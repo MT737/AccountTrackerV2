@@ -1,6 +1,6 @@
 using System;
 
-namespace AccountTrackerV2.Models
+namespace AccountTrackerV2.ViewModels
 {
     public class ErrorViewModel
     {

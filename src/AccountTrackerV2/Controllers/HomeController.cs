@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using AccountTrackerV2.Models;
+using AccountTrackerV2.ViewModels;
 
 namespace AccountTrackerV2.Controllers
 {

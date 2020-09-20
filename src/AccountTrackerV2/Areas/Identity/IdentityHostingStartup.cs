@@ -16,12 +16,12 @@ namespace AccountTrackerV2.Areas.Identity
         public void Configure(IWebHostBuilder builder)
         {
             builder.ConfigureServices((context, services) => {
-                services.AddDbContext<AccountTrackerV2UserContext>(options =>
+                services.AddDbContext<AccountTrackerV2Context>(options =>
                     options.UseSqlServer(
-                        context.Configuration.GetConnectionString("AccountTrackerV2UserContextConnection")));
+                        context.Configuration.GetConnectionString("AccountTrackerV2ContextConnection")));
 
                 services.AddDefaultIdentity<AccountTrackerV2User>(options => options.SignIn.RequireConfirmedAccount = true)
-                    .AddEntityFrameworkStores<AccountTrackerV2UserContext>();
+                    .AddEntityFrameworkStores<AccountTrackerV2Context>();
             });
         }
     }
