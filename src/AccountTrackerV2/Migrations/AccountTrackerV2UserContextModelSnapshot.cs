@@ -405,31 +405,31 @@ namespace AccountTrackerV2.Migrations
                     b.HasOne("AccountTrackerV2.Models.Account", "Account")
                         .WithMany("Transactions")
                         .HasForeignKey("AccountID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AccountTrackerV2.Models.Category", "Category")
                         .WithMany("Transactions")
                         .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AccountTrackerV2.Models.TransactionType", "TransactionType")
                         .WithMany("Transactions")
                         .HasForeignKey("TransactionTypeID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("AccountTrackerV2.Models.Vendor", "Vendor")
                         .WithMany("Transactions")
                         .HasForeignKey("VendorID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

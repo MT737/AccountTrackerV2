@@ -109,31 +109,31 @@ namespace AccountTrackerV2.Migrations
                         column: x => x.AccountID,
                         principalTable: "Accounts",
                         principalColumn: "AccountID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Transactions_Categories_CategoryID",
                         column: x => x.CategoryID,
                         principalTable: "Categories",
                         principalColumn: "CategoryID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Transactions_TransactionTypes_TransactionTypeID",
                         column: x => x.TransactionTypeID,
                         principalTable: "TransactionTypes",
                         principalColumn: "TransactionTypeID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Transactions_AspNetUsers_UserID",
                         column: x => x.UserID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Transactions_Vendors_VendorID",
                         column: x => x.VendorID,
                         principalTable: "Vendors",
                         principalColumn: "VendorID",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

@@ -29,6 +29,18 @@ namespace AccountTrackerV2.Data
 
             builder.Entity<Transaction>()
                 .Property(t => t.Amount).HasColumnType("decimal(18,2)");
+
+            builder.Entity<TransactionType>().HasData(
+                new TransactionType { TransactionTypeID = 1, Name = "Payment From" },
+                new TransactionType { TransactionTypeID = 2, Name = "Payment To" }
+                );
+            
+            //This method of setting cascade behavior in EFCore is not working properly. Cascade on delete was removed by making manual edits to the CreatedAppDataTables migration.
+            //builder.Entity<Transaction>()
+            //    .HasOne(x => x.Category)
+            //    .WithMany()
+            //    .HasForeignKey(x => x.CategoryID)
+            //    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
