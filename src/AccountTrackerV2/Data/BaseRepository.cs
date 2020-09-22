@@ -4,14 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AccountTrackerV2.Interfaces;
 
 namespace AccountTrackerV2.Data
 {
-    public abstract class BaseRepository<TEntity> where TEntity : class
+    public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
         //Properties
         protected AccountTrackerV2Context Context { get; private set; }
-        
+
         //Base constructor
         public BaseRepository(AccountTrackerV2Context context)
         {

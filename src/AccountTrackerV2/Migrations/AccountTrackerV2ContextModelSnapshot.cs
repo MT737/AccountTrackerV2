@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccountTrackerV2.Migrations
 {
     [DbContext(typeof(AccountTrackerV2Context))]
-    partial class AccountTrackerV2UserContextModelSnapshot : ModelSnapshot
+    partial class AccountTrackerV2ContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
