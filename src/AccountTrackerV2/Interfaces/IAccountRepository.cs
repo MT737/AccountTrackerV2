@@ -1,4 +1,5 @@
 ﻿using AccountTrackerV2.Models;
+using AccountTrackerV2.ViewModels;
 using System.Collections.Generic;
 
 namespace AccountTrackerV2.Interfaces
@@ -10,7 +11,7 @@ namespace AccountTrackerV2.Interfaces
         int GetCount(string userID);
         int GetID(string name, string userID);
         IList<Account> GetList(string userID);
-        bool NameExists(Account account, string userID);
+        bool NameExists(AccountViewModel vm, string userID);
         bool UserOwnsAccount(int id, string userID);
     }
 }

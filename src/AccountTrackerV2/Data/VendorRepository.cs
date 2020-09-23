@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AccountTrackerV2.Interfaces;
+using AccountTrackerV2.ViewModels;
 
 namespace AccountTrackerV2.Data
 {
@@ -78,13 +79,13 @@ namespace AccountTrackerV2.Data
         /// <summary>
         /// Determines if the vendor name currently exits in the DB.
         /// </summary>
-        /// <param name="vendor">Vendor: vendor entity containing the vendor name to test for existence.</param>
+        /// <param name="vm">Vendor: vendor entity containing the vendor name to test for existence.</param>
         /// <param name="userID">String: Used to filter the vendor name search to just those owned by the user.</param>
         /// <returns>Bool: True if the vendor name already exists in the DB. False otherwise.</returns>
-        public bool NameExists(Vendor vendor, string userID)
+        public bool NameExists(EntityViewModel vm, string userID)
         {
             return Context.Vendors
-                .Where(v => v.UserID == userID && v.Name.ToLower() == vendor.Name.ToLower() && v.VendorID != vendor.VendorID)
+                .Where(v => v.UserID == userID && v.Name.ToLower() == vm.EntityOfInterest.Name.ToLower() && v.VendorID != vm.EntityOfInterest.EntityID)
                 .Any();
         }
 
@@ -128,7 +129,7 @@ namespace AccountTrackerV2.Data
                         UserID = userID,
                         Name = "N/A",
                         IsDefault = true,
-                        IsDisplayed = true
+                        IsDisplayed = false
                     };
                 Add(vend);                
             }
@@ -137,6 +138,13 @@ namespace AccountTrackerV2.Data
         public bool DefaultsExist(string userID)
         {
             return Context.Vendors.Where(v => v.UserID == userID && v.IsDefault == true).Any();
+        }
+
+        public bool IsDefault(int vendorId, string userID)
+        {
+            return Context.Vendors
+                .Where(v => v.VendorID == vendorId && v.UserID == userID && v.IsDefault == true)
+                .Any();
         }
 
     }

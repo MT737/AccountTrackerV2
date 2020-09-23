@@ -12,7 +12,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using static AccountTrackerV2.ViewModels.ApplicationViewModel;
 using AccountTrackerV2.Interfaces;
 using System.Security.Claims;
 
@@ -44,18 +43,18 @@ namespace AccountTrackerV2.Controllers
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IList<ApplicationViewModel.AccountWithBalance> accounts = new List<ApplicationViewModel.AccountWithBalance>();
-            accounts = GetAccountWithBalances(userID);
+            AccountViewModel vm = new AccountViewModel();
+            vm.AccountsWithBalances = GetAccountsWithBalances(userID);
 
             //TODO: May want to reconsider this placement. Could create a drag to keep pinging the DB if the user doesn't create an account.
             //If no accounts, this is likely a new user. Run the default builders.
-            if (accounts.Count == 0)
+            if (vm.AccountsWithBalances.Count == 0)
             {
                 _vendorRepository.CreateDefaults(userID);
                 _categoryRepository.CreateDefaults(userID);                
             }
 
-            return View(accounts);
+            return View(vm);
         }
 
         public IActionResult Add()
@@ -63,43 +62,60 @@ namespace AccountTrackerV2.Controllers
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
             //Instantiate an empty ViewModel
-            ApplicationViewModel vm = new ApplicationViewModel();
-
-            //Instantiate an empty AccountOfInterest property of the VM
-            vm.AccountOfInterest = new Account();
-            vm.AccountOfInterest.UserID = userID;
-            vm.TransactionOfInterest = new Transaction();
-            vm.TransactionOfInterest.UserID = userID;
-
+            AccountViewModel vm = new AccountViewModel();
+            
+            //Instantiate empty AccountOfInterest and TransactionOfInterest properties in the VM
+            vm.AccountOfInterest = new AccountViewModel.VMAccount();
+            vm.AccountTransaction = new AccountViewModel.VMAccountTransaction();
+                        
             //Call the view and pass the VM.
             return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Add(ApplicationViewModel vm)
+        public IActionResult Add(AccountViewModel vm)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (vm.AccountOfInterest.Name != null)
             {
-                //Validate the new account
-                vm.AccountOfInterest.UserID = userID;
-                vm.TransactionOfInterest.UserID = userID;
-                ValidateAccount(vm.AccountOfInterest, vm.AccountOfInterest.UserID);
+                //Validate the new account                
+                ValidateAccount(vm, userID);
 
                 //Confirm valid modelstate
                 if (ModelState.IsValid)
                 {
+                    //Convert the VMAccount to a DBAccount.
+                    Account account = new Account
+                    {
+                        Name = vm.AccountOfInterest.Name,
+                        UserID = userID,
+                        IsAsset = vm.AccountOfInterest.IsAsset,
+                        IsActive = vm.AccountOfInterest.IsActive
+                    };
+
                     //Add the account to the account table in the DB.
-                    //TODO: refactor for DI
-                    Account account = new Account();
-                    account = vm.AccountOfInterest;
                     _accountRepository.Add(account);
 
-                    //Add a transaction to the transaction table in the DB to create the initial account balance.                
-                    CompleteAccountTransaction(vm, true, userID);
-                    _transactionRepository.Add(vm.TransactionOfInterest);
+                    //Gathering the data required to complete a transaction.
+                    CompleteAccountTransaction(vm, newAccount: true, userID);
+
+                    //Convert the VMTransaction to a DBTransaction
+                    Transaction transaction = new Transaction
+                    {
+                        UserID = userID,
+                        TransactionDate = vm.AccountTransaction.TransactionDate,
+                        TransactionTypeID = vm.AccountTransaction.TransactionTypeID,
+                        AccountID = vm.AccountTransaction.AccountID,
+                        CategoryID = vm.AccountTransaction.CategoryID,
+                        VendorID = vm.AccountTransaction.VendorID,
+                        Amount = vm.AccountTransaction.Amount,
+                        Description = vm.AccountTransaction.Description
+                    };
+
+                    //Add the transaction to the transaction table in the DB to create the initial account balance.                
+                    _transactionRepository.Add(transaction);
 
                     TempData["Message"] = "Account successfully added.";
 
@@ -114,45 +130,51 @@ namespace AccountTrackerV2.Controllers
         {
             if (id == null)
             {
-                //TODO: confirm that this works the way I think it does.
+                //TODO: confirm that this works the way I think it does
                 return BadRequest();
             }
 
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            //Confirm user owns the account.
+            //Confirm user owns the account
             if (!_accountRepository.UserOwnsAccount((int)id, userID))
             {
                 return NotFound();
             }
 
-            ApplicationViewModel vm = new ApplicationViewModel();
-            vm.TransactionOfInterest = new Transaction();
-            vm.AccountOfInterest = _accountRepository.Get((int)id, userID);
-            vm.TransactionOfInterest.Amount = _accountRepository.GetBalance((int)id, userID, vm.AccountOfInterest.IsAsset);
-           
-            //TODO: Refactor to remove need to pass userID.
-            vm.TransactionOfInterest.UserID = userID;
-            vm.AccountOfInterest.UserID = userID;
+            //Get the account
+            Account account = _accountRepository.Get((int)id, userID);
+
+            //Convert the DBAccount to a VMAccount
+            AccountViewModel vm = new AccountViewModel();
+            vm.AccountOfInterest = new AccountViewModel.VMAccount
+            {
+                AccountID = account.AccountID,
+                Name = account.Name,
+                IsAsset = account.IsAsset,
+                IsActive = account.IsActive
+            };
+            vm.AccountTransaction = new AccountViewModel.VMAccountTransaction
+            {
+                Amount = _accountRepository.GetBalance(account.AccountID, userID, account.IsAsset)
+            };
 
             return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(ApplicationViewModel vm)
+        public IActionResult Edit(AccountViewModel vm)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (vm.AccountOfInterest.Name != null)
             {
                 //Validate the account
-                vm.AccountOfInterest.UserID = userID;
-                vm.TransactionOfInterest.UserID = userID;
-                ValidateAccount(vm.AccountOfInterest, vm.AccountOfInterest.UserID);
+                ValidateAccount(vm, userID);
 
                 //Confirm user owns the account.
-                if (!_accountRepository.UserOwnsAccount(vm.AccountOfInterest.AccountID, vm.AccountOfInterest.UserID))
+                if (!_accountRepository.UserOwnsAccount(vm.AccountOfInterest.AccountID, userID))
                 {
                     return NotFound();
                 }
@@ -160,23 +182,45 @@ namespace AccountTrackerV2.Controllers
                 if (ModelState.IsValid)
                 {
                     //Grab current balance before updating the DB
-                    decimal currentBalance = _accountRepository.GetBalance(vm.AccountOfInterest.AccountID, vm.AccountOfInterest.UserID, vm.AccountOfInterest.IsAsset);
+                    decimal currentBalance = _accountRepository.GetBalance(vm.AccountOfInterest.AccountID, userID, vm.AccountOfInterest.IsAsset);
+
+                    //Convert the VMAccount to DBAccount
+                    Account account = new Account
+                    {
+                        AccountID = vm.AccountOfInterest.AccountID,
+                        Name = vm.AccountOfInterest.Name,
+                        IsAsset = vm.AccountOfInterest.IsAsset,
+                        IsActive = vm.AccountOfInterest.IsActive,
+                        UserID = userID
+                    };
 
                     //Update the account table in the DB
-                    Account account = new Account();
-                    account = vm.AccountOfInterest;
                     _accountRepository.Update(account);
 
                     //If balance changed, add an adjustment transaction.
-                    if (currentBalance != vm.TransactionOfInterest.Amount)
+                    if (currentBalance != vm.AccountTransaction.Amount)
                     {
                         //Determine adjustment
-                        vm.TransactionOfInterest.Amount = vm.TransactionOfInterest.Amount - currentBalance;
+                        vm.AccountTransaction.Amount = vm.AccountTransaction.Amount - currentBalance;
+
+                        //Gathering the data required to complete a transaction.
+                        CompleteAccountTransaction(vm, newAccount: false, userID);
+
+                        //Convert the VMTransaction to DBTransaction
+                        Transaction transaction = new Transaction
+                        {
+                            UserID = userID,
+                            TransactionDate = vm.AccountTransaction.TransactionDate,
+                            TransactionTypeID = vm.AccountTransaction.TransactionTypeID,
+                            AccountID = vm.AccountTransaction.AccountID,
+                            CategoryID = vm.AccountTransaction.CategoryID,
+                            VendorID = vm.AccountTransaction.VendorID,
+                            Amount = vm.AccountTransaction.Amount,
+                            Description = vm.AccountTransaction.Description
+                        };
 
                         //Add a transaction to the transaction table in the DB to create an account balance adjustment transaction.                
-                        CompleteAccountTransaction(vm, false, userID);
-                        _transactionRepository.Add(vm.TransactionOfInterest);
-
+                        _transactionRepository.Add(transaction);
                     }
 
                     TempData["Message"] = "Account successfully edited.";
@@ -193,10 +237,10 @@ namespace AccountTrackerV2.Controllers
         /// </summary>
         /// <param name="accountOfInterest">Account: account entity being added or edited.</param>
         /// <param name="userID">String: userID of the owner of the account.</param>
-        private void ValidateAccount(Account accountOfInterest, string userID)
+        private void ValidateAccount(AccountViewModel vm, string userID)
         {
             //New or updated Accounts cannot have the same name as currently existing accounts (except for the same account if editing).
-            if (_accountRepository.NameExists(accountOfInterest, userID))
+            if (_accountRepository.NameExists(vm, userID))
             {
                 ModelState.AddModelError("accountOfInterest.Name", "The provided account name already exsits.");
             }
@@ -205,32 +249,32 @@ namespace AccountTrackerV2.Controllers
         /// <summary>
         /// Fills the transaction information required when adding or editing a transaction.
         /// </summary>
-        /// <param name="vm">ViewModel: viewmodel entity containing the required transaction and account information.</param>
+        /// <param name="vm">ViewModel: viewmodel containing the required transaction and account information.</param>
         /// <param name="newAccount">Bool: indication as to if the account is new.</param>
-        private void CompleteAccountTransaction(ApplicationViewModel vm, bool newAccount, string userID)
+        private void CompleteAccountTransaction(AccountViewModel vm, bool newAccount, string userID)
         {
-            vm.TransactionOfInterest.AccountID = _accountRepository.GetID(vm.AccountOfInterest.Name, vm.AccountOfInterest.UserID);
-            vm.TransactionOfInterest.VendorID = _vendorRepository.GetID("N/A", userID);
-            vm.TransactionOfInterest.TransactionDate = DateTime.Now.Date;
+            vm.AccountTransaction.AccountID = _accountRepository.GetID(vm.AccountOfInterest.Name, userID);
+            vm.AccountTransaction.VendorID = _vendorRepository.GetID("N/A", userID);
+            vm.AccountTransaction.TransactionDate = DateTime.Now.Date;
 
             if (newAccount)
             {
-                vm.TransactionOfInterest.CategoryID = _categoryRepository.GetID("New Account", userID);
-                vm.TransactionOfInterest.Description = "New Account";
+                vm.AccountTransaction.CategoryID = _categoryRepository.GetID("New Account", userID);
+                vm.AccountTransaction.Description = "New Account";
             }
             else
             {
-                vm.TransactionOfInterest.CategoryID = _categoryRepository.GetID("Account Correction", userID);
-                vm.TransactionOfInterest.Description = "Account Balance Adjustment";
+                vm.AccountTransaction.CategoryID = _categoryRepository.GetID("Account Correction", userID);
+                vm.AccountTransaction.Description = "Account Balance Adjustment";
             }
 
             if (vm.AccountOfInterest.IsAsset)
             {
-                vm.TransactionOfInterest.TransactionTypeID = _transactionTypeRepository.GetTransactionType("Payment To").TransactionTypeID;
+                vm.AccountTransaction.TransactionTypeID = _transactionTypeRepository.GetTransactionType("Payment To").TransactionTypeID;
             }
             else
             {
-                vm.TransactionOfInterest.TransactionTypeID = _transactionTypeRepository.GetTransactionType("Payment From").TransactionTypeID;
+                vm.AccountTransaction.TransactionTypeID = _transactionTypeRepository.GetTransactionType("Payment From").TransactionTypeID;
             }
         }
 
@@ -240,19 +284,22 @@ namespace AccountTrackerV2.Controllers
         /// </summary>
         /// <param name="userID">String: userID for which to return account balances.</param>
         /// <returns>IList of AccountWithBalance entities.</returns>
-        private IList<AccountWithBalance> GetAccountWithBalances(string userID)
+        private IList<AccountViewModel.AccountWithBalance> GetAccountsWithBalances(string userID)
         {
             //Get list of accounts
-            IList<AccountWithBalance> accountsWithBalances = new List<AccountWithBalance>();
+            IList<AccountViewModel.AccountWithBalance> accountsWithBalances = new List<AccountViewModel.AccountWithBalance>();
             foreach (var account in _accountRepository.GetList(userID))
             {
                 //Set detailed values and get amount
-                AccountWithBalance accountWithBalanceHolder = new AccountWithBalance();
-                accountWithBalanceHolder.AccountID = account.AccountID;
-                accountWithBalanceHolder.Name = account.Name;
-                accountWithBalanceHolder.IsAsset = account.IsAsset;
-                accountWithBalanceHolder.IsActive = account.IsActive;
-                accountWithBalanceHolder.Balance = _accountRepository.GetBalance(account.AccountID, userID, account.IsAsset);
+                AccountViewModel.AccountWithBalance accountWithBalanceHolder = new AccountViewModel.AccountWithBalance
+                {
+                    AccountID = account.AccountID,
+                    Name = account.Name,
+                    IsAsset = account.IsAsset,
+                    IsActive = account.IsActive,
+                    Balance = _accountRepository.GetBalance(account.AccountID, userID, account.IsAsset)
+                };
+                
                 accountsWithBalances.Add(accountWithBalanceHolder);
             }
 

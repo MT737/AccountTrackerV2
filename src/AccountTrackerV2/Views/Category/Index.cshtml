@@ -1,4 +1,4 @@
-﻿@model IList<AccountTrackerV2.Models.Category>
+﻿@model AccountTrackerV2.ViewModels.EntityViewModel
 
 @{
     ViewData["Title"] = "Categories";
@@ -10,7 +10,7 @@
     <div class="col-md-6">
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
         <div class="panel panel-default">
-            <div class="panel-body">
+            <div class="panel-body" style="overflow:auto">
                 <table class="table">
                     <thead>
                         <tr>
@@ -22,7 +22,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var category in Model)
+                        @foreach (var category in Model.Categories)
                         {
                             <tr>
                                 <td>@category.Name</td>

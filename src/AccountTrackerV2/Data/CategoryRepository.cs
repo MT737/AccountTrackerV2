@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AccountTrackerV2.Interfaces;
+using AccountTrackerV2.ViewModels;
 
 namespace AccountTrackerV2.Data
 {
@@ -56,10 +57,10 @@ namespace AccountTrackerV2.Data
         /// <param name="category">Category entity</param>
         /// <param name="userID">String userID of the user for which to compare category names.</param>
         /// <returns>Bool: True if the category name already exists in the database. False if not.</returns>
-        public bool NameExists(Category category, string userID)
+        public bool NameExists(EntityViewModel vm, string userID)
         {
             return Context.Categories
-                .Where(c => c.UserID == userID && c.Name.ToLower() == category.Name.ToLower() && c.CategoryID != category.CategoryID)
+                .Where(c => c.UserID == userID && c.Name.ToLower() == vm.EntityOfInterest.Name.ToLower() && c.CategoryID != vm.EntityOfInterest.EntityID)
                 .Any();
         }
 
@@ -123,17 +124,26 @@ namespace AccountTrackerV2.Data
             if (!DefaultsExist(userID)) //Preventing duplication of defaults.
             {
                 string[] categories = new string[] {"Account Transfer", "Account Correction", "New Account", "ATM Withdrawal", "Eating Out",
-                "Entertainment", "Gas", "Groceries/Sundries", "Shopping", "Returns/Deposits", "Other"};
+                "Entertainment", "Gas", "Groceries/Sundries", "Income", "Shopping", "Returns/Deposits", "Other"};
 
                 foreach (string category in categories)
-                {
+                {               
                     Category cat = new Category
                     {
                         UserID = userID,
                         Name = category,
                         IsDefault = true,
-                        IsDisplayed = true
                     };
+                    
+                    if (category == "Account Transfer" || category == "Account Correction" || category == "New Account" || category == "Income")
+                    {
+                        cat.IsDisplayed = false;                        
+                    }
+                    else
+                    {
+                        cat.IsDisplayed = true;
+                    }
+
                     Add(cat);
                 } 
             }
@@ -142,6 +152,13 @@ namespace AccountTrackerV2.Data
         public bool DefaultsExist(string userID)
         {
             return Context.Categories.Where(c => c.UserID == userID && c.IsDefault == true).Any();
+        }
+
+        public bool IsDefault(int entityID, string userID)
+        {
+            return Context.Categories
+                .Where(c => c.CategoryID == entityID && c.UserID == userID && c.IsDefault == true)
+                .Any();
         }
     }
 }

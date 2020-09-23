@@ -1,56 +1,41 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+﻿@model AccountTrackerV2.ViewModels.TransactionViewModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Transaction";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>@ViewData["Title"]</h2>
 
 <div class="row">
-
     <div class="col-md-6">
-
         <h3>Are you certain you want to delete this transaction?</h3>
-
     </div>
-
 </div>
 
 <div class="row">
-
     <div class="col-md-6">
-
         <p>Date: @Model.TransactionOfInterest.TransactionDate.ToString("MM/dd/yy")</p>
-        <p>Type: @Model.TransactionOfInterest.TransactionType.Name</p>
-        <p>Account: @Model.TransactionOfInterest.Account.Name</p>
-        <p>Category: @Model.TransactionOfInterest.Category.Name</p>
-        <p>Vendor: @Model.TransactionOfInterest.Vendor.Name</p>
+        <p>Type: @Model.TransactionOfInterest.TransactionType</p>
+        <p>Account: @Model.TransactionOfInterest.Account</p>
+        <p>Category: @Model.TransactionOfInterest.Category</p>
+        <p>Vendor: @Model.TransactionOfInterest.Vendor</p>
         <p>Amount: @Model.TransactionOfInterest.Amount.ToString("#,##0.00")</p>
         <p>Description: @Model.TransactionOfInterest.Description</p>
-
     </div>
-
 </div>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.TransactionOfInterest.UserID)
+<form asp-controller="Transaction" asp-action="Delete" asp-antiforgery="true" role="form">
     <div class="row">
-
         <div class="col-md-6">
-
             <button type="submit" class="btn btn-danger btn-lg margin-right">
                 <span class="glyphicon glyphicon-trash"></span> Delete
             </button>
-
             <a href="@Url.Action("Index", "Transaction")" class="btn btn-primary btn-lg marg-right">
                 <span class="glyphicon glyphicon-step-backward"></span>Back
             </a>
-
         </div>
-
     </div>
-}
+</form>
+
 

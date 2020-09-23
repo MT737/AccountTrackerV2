@@ -11,7 +11,6 @@ using AccountTrackerV2.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using AccountTrackerV2.Areas.Identity.Data;
-using static AccountTrackerV2.ViewModels.ApplicationViewModel;
 using AccountTrackerV2.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Principal;
@@ -46,17 +45,18 @@ namespace AccountTrackerV2.Controllers
 
         public IActionResult Index()
         {
-            //Instantiate viewmodel
-            //TODO: add vm to DI?
-            var vm = new ApplicationViewModel();
-
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            //TODO: add vm to DI?
+            //Instantiate viewmodel
+            HomeViewModel vm = new HomeViewModel
+            {
+                Transactions = GetTransactionsWithDetails(userID),
+                AccountsWithBalances = GetAccountWithBalances(userID),
+                ByCategorySpending = GetCategorySpending(userID),
+                ByVendorSpending = GetVendorSpending(userID)
+            };
 
-            //Complete viewmodel's properties required for dashboard view
-            vm.Transactions = GetTransactionsWithDetails(userID);
-            vm.AccountsWithBalances = GetAccountWithBalances(userID);
-            vm.ByCategorySpending = GetCategorySpending(userID);
-            vm.ByVendorSpending = GetVendorSpending(userID);
             return View(vm);
         }
 
@@ -65,16 +65,19 @@ namespace AccountTrackerV2.Controllers
         /// </summary>
         /// <param name="userID">String: UserID for which to retrieve VendorSpending objects.</param>
         /// <returns>IList VendorSpending objects.</returns>
-        private IList<VendorSpending> GetVendorSpending(string userID)
+        private IList<HomeViewModel.VendorSpending> GetVendorSpending(string userID)
         {
-            IList<VendorSpending> vendorSpending = new List<VendorSpending>();
+            IList<HomeViewModel.VendorSpending> vendorSpending = new List<HomeViewModel.VendorSpending>();
             foreach (var vendor in _vendorRepository.GetList(userID))
             {
                 if (vendor.IsDisplayed)
                 {
-                    VendorSpending vendorSpendingHolder = new VendorSpending();
-                    vendorSpendingHolder.Name = vendor.Name;
-                    vendorSpendingHolder.Amount = _vendorRepository.GetAmount(vendor.VendorID, userID);
+                    HomeViewModel.VendorSpending vendorSpendingHolder = new HomeViewModel.VendorSpending
+                    {
+                        Name = vendor.Name,
+                        Amount = _vendorRepository.GetAmount(vendor.VendorID, userID)
+                    };
+                    
                     vendorSpending.Add(vendorSpendingHolder);
                 }
             }
@@ -86,18 +89,19 @@ namespace AccountTrackerV2.Controllers
         /// </summary>
         /// <param name="userID">String: UserID for which to rerieve CategorySpending objects.</param>
         /// <returns></returns>
-        private IList<CategorySpending> GetCategorySpending(string userID)
+        private IList<HomeViewModel.CategorySpending> GetCategorySpending(string userID)
         {
-            var _userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            IList<CategorySpending> categorySpending = new List<CategorySpending>();
-            foreach (var category in _categoryRepository.GetList(_userID))
+            IList<HomeViewModel.CategorySpending> categorySpending = new List<HomeViewModel.CategorySpending>();
+            foreach (var category in _categoryRepository.GetList(userID))
             {
                 if (category.IsDisplayed)
                 {
-                    CategorySpending categorySpendingHolder = new CategorySpending();
-                    categorySpendingHolder.Name = category.Name;
-                    categorySpendingHolder.Amount = _categoryRepository.GetCategorySpending(category.CategoryID, userID);
+                    HomeViewModel.CategorySpending categorySpendingHolder = new HomeViewModel.CategorySpending
+                    {
+                        Name = category.Name,
+                        Amount = _categoryRepository.GetCategorySpending(category.CategoryID, userID)
+                    };
+
                     categorySpending.Add(categorySpendingHolder);
                 }
             }
@@ -110,14 +114,14 @@ namespace AccountTrackerV2.Controllers
         /// </summary>
         /// <param name="userID">String: userID for which to return account balances.</param>
         /// <returns>IList of AccountWithBalance entities.</returns>
-        private IList<AccountWithBalance> GetAccountWithBalances(string userID)
+        private IList<HomeViewModel.AccountWithBalance> GetAccountWithBalances(string userID)
         {
             //Get list of accounts
-            IList<AccountWithBalance> accountsWithBalances = new List<AccountWithBalance>();
+            IList<HomeViewModel.AccountWithBalance> accountsWithBalances = new List<HomeViewModel.AccountWithBalance>();
             foreach (var account in _accountRepository.GetList(userID))
             {
                 //Set detailed values and get amount
-                AccountWithBalance accountWithBalanceHolder = new AccountWithBalance();
+                HomeViewModel.AccountWithBalance accountWithBalanceHolder = new HomeViewModel.AccountWithBalance();
                 accountWithBalanceHolder.AccountID = account.AccountID;
                 accountWithBalanceHolder.Name = account.Name;
                 accountWithBalanceHolder.IsAsset = account.IsAsset;

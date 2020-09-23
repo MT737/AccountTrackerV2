@@ -1,15 +1,15 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+﻿@model AccountTrackerV2.ViewModels.EntityViewModel
 <div class="row">
     <div class="form-group">
-        @Html.LabelFor(m => m.CategoryOfInterest.Name, new { @class = "control-label" })
-        @Html.TextBoxFor(m => m.CategoryOfInterest.Name, "", new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.CategoryOfInterest.Name, "", new { @class = "text-danger" })
+        <label asp-for="@Model.EntityOfInterest.Name"></label>
+        <input asp-for="@Model.EntityOfInterest.Name" class="form-control" />
+        <span asp-validation-for="@Model.EntityOfInterest.Name" class="text-danger"></span>
     </div>
 </div>
 <div class="row">
     <div class="form-group">
-        @Html.LabelFor(m => m.CategoryOfInterest.IsDisplayed, new { @class = "control-label" })
-        @Html.CheckBoxFor(m => m.CategoryOfInterest.IsDisplayed, new { @class = "form-control" })
+        <label asp-for="@Model.EntityOfInterest.IsDisplayed"></label>
+        <input asp-for="@Model.EntityOfInterest.IsDisplayed" class="form-control" type="checkbox" />
     </div>
 </div>
 

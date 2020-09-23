@@ -1,19 +1,15 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+﻿@model AccountTrackerV2.ViewModels.AccountViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Account";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.TransactionOfInterest.UserID)
-    @Html.HiddenFor(m => m.AccountOfInterest.UserID)    
-
-    <!--TODO: Research better way to pass transaction ID back to controller.-->
+<form asp-controller="Account" asp-action="Edit" asp-antiforgery="true" method="post" role="form">
+    
+    <!--TODO: Research better way to pass account ID back to controller.-->
     @Html.HiddenFor(m => m.AccountOfInterest.AccountID)
 
     <partial name="_AccountForm.cshtml" />
@@ -26,7 +22,7 @@
             </div>
         </div>
     </div>
-}
+</form>
 
 <div>
     @Html.ActionLink("Back to List", "Index")

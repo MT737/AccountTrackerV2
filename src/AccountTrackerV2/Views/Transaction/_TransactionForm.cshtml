@@ -1,59 +1,57 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+﻿@model AccountTrackerV2.ViewModels.TransactionViewModel
 
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <!--TODO: Issue- DateTimePicker is not working.-->
-            @Html.LabelFor(m => m.TransactionOfInterest.TransactionDate, new { @class = "control-label" })
-            @Html.TextBoxFor(m => m.TransactionOfInterest.TransactionDate, "{0:d}", new { @class = "form-control datepicker" })
-            @Html.ValidationMessageFor(m => m.TransactionOfInterest.TransactionDate, "", new { @class = "text-danger"})
+            <label asp-for="@Model.TransactionOfInterest.TransactionDate"></label>
+            <input asp-for="@Model.TransactionOfInterest.TransactionDate" class="form-control" type="date" />
         </div>
     </div>
     <div class="col-md-6">
         <div class="form-group">
-            @Html.LabelFor(m => m.TransactionOfInterest.TransactionTypeID, new { @class = "control-label" })
-            @Html.DropDownListFor(m => m.TransactionOfInterest.TransactionTypeID, Model.TransactionTypesSelectList, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.TransactionOfInterest.TransactionTypeID, "", new { @class = "text-danger"})
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            @Html.LabelFor(m => m.TransactionOfInterest.AccountID, new { @class = "control-label" })
-            @Html.DropDownListFor(m => m.TransactionOfInterest.AccountID, Model.AccountSelectList, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.TransactionOfInterest.AccountID, "", new { @class = "text-danger"})
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            @Html.LabelFor(m => m.TransactionOfInterest.CategoryID, new { @class = "control-label" })
-            @Html.DropDownListFor(m => m.TransactionOfInterest.CategoryID, Model.CategorySelectList, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.TransactionOfInterest.CategoryID, "", new { @class = "text-danger"})
+            <label asp-for="@Model.TransactionOfInterest.TransactionTypeID"></label>
+            <select asp-for="@Model.TransactionOfInterest.TransactionTypeID" class="form-control" asp-items="@Model.TransactionTypesSelectList"></select>
+            <span asp-validation-for="@Model.TransactionOfInterest.TransactionTypeID" class="text-danger"></span>
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            @Html.LabelFor(m => m.TransactionOfInterest.VendorID, new { @class = "control-label" })
-            @Html.DropDownListFor(m => m.TransactionOfInterest.VendorID, Model.VendorSelectList, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.TransactionOfInterest.VendorID, "", new { @class = "text-danger"})
+            <label asp-for="@Model.TransactionOfInterest.AccountID"></label>
+            <select asp-for="@Model.TransactionOfInterest.AccountID" class="form-control" asp-items="@Model.AccountSelectList"></select>
+            <span asp-validation-for="@Model.TransactionOfInterest.AccountID" class="text-danger"></span>
         </div>
     </div>
     <div class="col-md-6">
         <div class="form-group">
-            @Html.LabelFor(m => m.TransactionOfInterest.Amount, new { @class = "control-label" })
-            @Html.TextBoxFor(m => m.TransactionOfInterest.Amount, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.TransactionOfInterest.Amount, "", new { @class = "text-danger"})
+            <label asp-for="@Model.TransactionOfInterest.CategoryID"></label>
+            <select asp-for="@Model.TransactionOfInterest.CategoryID" class="form-control" asp-items="@Model.CategorySelectList"></select>
+            <span asp-validation-for="@Model.TransactionOfInterest.CategoryID" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="@Model.TransactionOfInterest.VendorID"></label>
+            <select asp-for="@Model.TransactionOfInterest.VendorID" class="form-control" asp-items="@Model.VendorSelectList"></select>
+            <span asp-validation-for="@Model.TransactionOfInterest.VendorID" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label asp-for="@Model.TransactionOfInterest.Amount"></label>
+            <input asp-for="@Model.TransactionOfInterest.Amount" class="form-control"/>
+            <span asp-validation-for="@Model.TransactionOfInterest.Amount" class="text-danger"></span>
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12">
         <div class="form-group">
-            @Html.LabelFor(m => m.TransactionOfInterest.Description, new { @class = "control-label " })
-            @Html.TextAreaFor(m => m.TransactionOfInterest.Description, 14, 10, new { @class = "form-control" })            
+            <label asp-for="@Model.TransactionOfInterest.Description"></label>
+            <input asp-for="@Model.TransactionOfInterest.Description" class="form-control" type="text"/>
         </div>
     </div>
 </div>

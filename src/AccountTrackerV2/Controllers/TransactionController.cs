@@ -10,19 +10,20 @@ using Microsoft.AspNetCore.Identity;
 using AccountTrackerV2.Areas.Identity.Data;
 using AccountTrackerV2.Interfaces;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 
 namespace AccountTrackerV2.Controllers
 {
     public class TransactionController : Controller
     {
-        //TODO: Need to account for instances where the user deletes their account! Cascade delete works for all other tables but transactions!
+        //TODO: Need to account for instances where the user deletes their user account! Cascade delete works for all other tables but transactions!
 
         private IAccountRepository _accountRepository = null;
         private ICategoryRepository _categoryRepository = null;
         private ITransactionRepository _transactionRepository = null;
         private ITransactionTypeRepository _transactionTypeRepository = null;
         private IVendorRepository _vendorRepository = null;
-        
+
         public TransactionController(IAccountRepository accountRepository, ICategoryRepository categoryRepository, ITransactionRepository transactionRepository,
             ITransactionTypeRepository transactionTypeRepository, IVendorRepository vendorRepository)
         {
@@ -30,7 +31,7 @@ namespace AccountTrackerV2.Controllers
             _categoryRepository = categoryRepository;
             _transactionRepository = transactionRepository;
             _transactionTypeRepository = transactionTypeRepository;
-            _vendorRepository = vendorRepository;            
+            _vendorRepository = vendorRepository;
         }
 
         public IActionResult Index()
@@ -39,14 +40,12 @@ namespace AccountTrackerV2.Controllers
 
             //TODO: tell user to create an account if none exist.
 
-            //Instantiate viewmodel
+            //Instantiate viewmodel with list of transactions.
             //TODO: Refactor for DI?
-            var vm = new ApplicationViewModel();
-
-            //Complete viewmodel property required for transaction view
-            vm.Transactions = GetTransactionsWithDetails(userID);
-
-            //TODO: If no transactions, inform the user to create an account.
+            TransactionViewModel vm = new TransactionViewModel
+            {
+                Transactions = GetTransactionsWithDetails(userID)
+            };
 
             return View(vm);
         }
@@ -58,43 +57,44 @@ namespace AccountTrackerV2.Controllers
             //TODO: add a check for an account and warn the user to create one if none exist.
 
             //Instantiate viewmodel
-            var vm = new ApplicationViewModel();
+            TransactionViewModel vm = new TransactionViewModel();
 
             //Instantiate Transaction of Interest property
-            vm.TransactionOfInterest = new Transaction();
-
-            //Preset default values
-            vm.TransactionOfInterest.TransactionDate = DateTime.Now.Date;
-            vm.TransactionOfInterest.Amount = 0.00M;
-            vm.TransactionOfInterest.UserID = userID;
+            vm.TransactionOfInterest = new TransactionViewModel.VMTransaction
+            {
+                //Prefill defaults.
+                TransactionDate = DateTime.Now.Date,
+                Amount = 0.00M,
+            };
 
             //TODO: Consider limiting the select list items. Probably shouldn't allow users to select new account balance.
             //Initialize set list items.
-            vm.Init(vm.TransactionOfInterest.UserID, _transactionTypeRepository, _accountRepository, _categoryRepository, _vendorRepository);
+            vm.Init(userID, _accountRepository, _categoryRepository, _transactionTypeRepository, _vendorRepository);
 
             return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Add(ApplicationViewModel vm)
+        public IActionResult Add(TransactionViewModel vm)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            //Don't trust the passed userID. 
-            vm.TransactionOfInterest.UserID = userID;
 
             //TODO: Confirm validation requirements.
             if (ModelState.IsValid)
             {
-                _transactionRepository.Add(vm.TransactionOfInterest);
+                //Convert VMTransaction to DBTransaction
+                Transaction transaction = ConvertToDBTransaction(vm.TransactionOfInterest, userID);
+
+                //Add transaction to the DB
+                _transactionRepository.Add(transaction);
 
                 TempData["Message"] = "Transaction successfully added.";
 
                 return RedirectToAction("Index");
             }
 
-            vm.Init(vm.TransactionOfInterest.UserID, _transactionTypeRepository, _accountRepository, _categoryRepository, _vendorRepository);
+            vm.Init(userID, _accountRepository, _categoryRepository, _transactionTypeRepository, _vendorRepository);
             return View(vm);
         }
 
@@ -117,14 +117,12 @@ namespace AccountTrackerV2.Controllers
                 return NotFound();
             }
 
-            //Instantiate viewmodel and set transactionofinterest property
-            var vm = new ApplicationViewModel { TransactionOfInterest = transaction };
+            //Convert DBTransaction to VMTransaction
+            TransactionViewModel vm = new TransactionViewModel();
+            vm.TransactionOfInterest = ConvertToVMTransaction(transaction);
 
             //Initialize select list items
-            vm.Init(vm.TransactionOfInterest.UserID, _transactionTypeRepository, _accountRepository, _categoryRepository, _vendorRepository);
-
-            //TODO: Refactor to remove the need to pass userID to the view.
-            vm.TransactionOfInterest.UserID = userID;
+            vm.Init(userID, _accountRepository, _categoryRepository, _transactionTypeRepository, _vendorRepository);
 
             //Return the view
             return View(vm);
@@ -132,33 +130,34 @@ namespace AccountTrackerV2.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(ApplicationViewModel vm)
+        public IActionResult Edit(TransactionViewModel vm)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //TODO: Currently allowing edit even when nothing is changed. Fix that.
             //TODO: Confirm additional validation requirements.
 
-            //Don't trust client passed userID
-            vm.TransactionOfInterest.UserID = userID;
-
             //Confirm user owns the transaction
-            if (!_transactionRepository.UserOwnsTransaction(vm.TransactionOfInterest.TransactionID, vm.TransactionOfInterest.UserID))
+            if (!_transactionRepository.UserOwnsTransaction(vm.TransactionOfInterest.TransactionID, userID))
             {
                 return NotFound();
             }
-            
+
             //If model state is valid, update the db and redirect to index.
             if (ModelState.IsValid)
             {
-                _transactionRepository.Update(vm.TransactionOfInterest);
+                //Convert VMTransaction to DBTransaction
+                Transaction transaction = ConvertToDBTransaction(vm.TransactionOfInterest, userID);
+
+                //Update the transaction in the DB.
+                _transactionRepository.Update(transaction);
                 TempData["Message"] = "Your transaction was updated successfully.";
 
                 return RedirectToAction("Index");
             }
 
             //If model state is in error, reinit the select lists and call the edit view again.
-            vm.Init(vm.TransactionOfInterest.UserID, _transactionTypeRepository, _accountRepository, _categoryRepository, _vendorRepository);
+            vm.Init(userID, _accountRepository, _categoryRepository, _transactionTypeRepository, _vendorRepository);
             return View(vm);
         }
 
@@ -181,8 +180,17 @@ namespace AccountTrackerV2.Controllers
                 return NotFound();
             }
 
-            //Instantiate viewmodel and set transactionofinterest property
-            var vm = new ApplicationViewModel { TransactionOfInterest = transaction };  
+            //Instantiate viewmodel and convert DBTransaction to VMTransaction
+            TransactionViewModel vm = new TransactionViewModel
+            {
+                TransactionOfInterest = ConvertToVMTransaction(transaction)
+            };
+
+            vm.TransactionOfInterest.TransactionType = transaction.TransactionType.Name;
+            vm.TransactionOfInterest.Account = transaction.Account.Name;
+            vm.TransactionOfInterest.Category = transaction.Category.Name;
+            vm.TransactionOfInterest.Vendor = transaction.Vendor.Name;
+
 
             //Return the view
             return View(vm);
@@ -222,6 +230,41 @@ namespace AccountTrackerV2.Controllers
             }
 
             return transactions;
+        }
+
+        private TransactionViewModel.VMTransaction ConvertToVMTransaction(Transaction dbTransaction)
+        {
+            TransactionViewModel.VMTransaction transaction = new TransactionViewModel.VMTransaction
+            {
+                TransactionID = dbTransaction.TransactionID,
+                TransactionDate = dbTransaction.TransactionDate,
+                TransactionTypeID = dbTransaction.TransactionTypeID,
+                AccountID = dbTransaction.AccountID,
+                CategoryID = dbTransaction.CategoryID,
+                VendorID = dbTransaction.VendorID,
+                Amount = dbTransaction.Amount,
+                Description = dbTransaction.Description
+            };
+
+            return transaction;
+        }
+
+        private Transaction ConvertToDBTransaction(TransactionViewModel.VMTransaction vmTransaction, string userID)
+        {
+            Transaction transaction = new Transaction
+            {
+                TransactionID = vmTransaction.TransactionID,
+                UserID = userID,
+                TransactionDate = vmTransaction.TransactionDate,
+                TransactionTypeID = vmTransaction.TransactionTypeID,
+                AccountID = vmTransaction.AccountID,
+                CategoryID = vmTransaction.CategoryID,
+                VendorID = vmTransaction.VendorID,
+                Amount = vmTransaction.Amount,
+                Description = vmTransaction.Description
+            };
+
+            return transaction;
         }
     }
 }

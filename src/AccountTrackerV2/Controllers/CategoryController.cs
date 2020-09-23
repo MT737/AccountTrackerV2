@@ -29,52 +29,54 @@ namespace AccountTrackerV2.Controllers
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            //TODO: Refactor for DI?
-            IList<Category> categories = new List<Category>();        
-            categories = _categoryRepository.GetList(userID);
+            //TODO: Add VMs to services DI?
+            EntityViewModel vm = new EntityViewModel();
+            vm.Categories = _categoryRepository.GetList(userID);
 
             //If categories list is 0, then this is likely a new user. Fill the default categories.
-            if (categories.Count == 0)
+            if (vm.Categories.Count == 0)
             {
                 _categoryRepository.CreateDefaults(userID);
-                categories = _categoryRepository.GetList(userID);
+                vm.Categories = _categoryRepository.GetList(userID);
             }
 
-            return View(categories);
+            return View(vm);
         }
 
         public IActionResult Add()
-        {
-            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+        {            
             //Refactor for DI?
-            ApplicationViewModel vm = new ApplicationViewModel();
-            vm.CategoryOfInterest = new Category();
-            //TODO: refactor to remove the need to pass userID
-            vm.CategoryOfInterest.UserID = userID;
-
+            EntityViewModel vm = new EntityViewModel();
+            vm.EntityOfInterest = new EntityViewModel.Entity();
+            
             return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Add(ApplicationViewModel vm)
+        public IActionResult Add(EntityViewModel vm)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            //Don't allow users to add a default category. 
-            vm.CategoryOfInterest.IsDefault = false;
-
-            if (vm.CategoryOfInterest.Name != null)
+                        
+            if (vm.EntityOfInterest.Name != null)
             {
-                ValidateCategory(vm.CategoryOfInterest, userID);
+                //TODO: Test trying to add a vendor by navigating directly to the post with input.
+
+                ValidateCategory(vm, userID);
 
                 if (ModelState.IsValid)
                 {
-                    vm.CategoryOfInterest.UserID = userID;
-
+                    //Convert VMCategory to DBCategory
+                    Category category = new Category
+                    {
+                        UserID = userID,
+                        Name = vm.EntityOfInterest.Name,
+                        IsDisplayed = vm.EntityOfInterest.IsDisplayed,
+                        IsDefault = false //User's cannot create default categories.
+                    };
+                    
                     //Add the category to the DB
-                    _categoryRepository.Add(vm.CategoryOfInterest);
+                    _categoryRepository.Add(category);
 
                     TempData["Message"] = "Category successfully added.";
 
@@ -87,12 +89,12 @@ namespace AccountTrackerV2.Controllers
 
         public IActionResult Edit(int? id)
         {
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
             if (id == null)
             {
                 return BadRequest();
             }
-
-            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //Confirm the user owns the category
             if (!_categoryRepository.UserOwnsCategory((int)id, userID))
@@ -100,16 +102,20 @@ namespace AccountTrackerV2.Controllers
                 return NotFound();
             }
 
-            //Don't allow users to edit a default category. Should be prevented by the UI, but confirming here. 
+            //Get the category data.
             Category category = _categoryRepository.Get((int)id, userID);
+            
+            //Don't allow users to edit a default category. Should be prevented by the UI, but confirming here. 
             if (!category.IsDefault)
             {
-                //TODO: Refactor for DI?
-                ApplicationViewModel vm = new ApplicationViewModel();
-                vm.CategoryOfInterest = category;
-                
-                //TODO: Refactor to remove the need to pass user ID to the view.
-                vm.CategoryOfInterest.UserID = userID;
+                //Convert the DBCategory to VMCategory
+                EntityViewModel vm = new EntityViewModel();
+                vm.EntityOfInterest = new EntityViewModel.Entity
+                {
+                    EntityID = category.CategoryID,
+                    Name = category.Name,
+                    IsDisplayed = category.IsDisplayed
+                };                
 
                 return View(vm);
             }
@@ -123,34 +129,41 @@ namespace AccountTrackerV2.Controllers
         //TODO: Don't need VM for this, as only a category object is required. Consider simplifying this and the ViewModel.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(ApplicationViewModel vm)
+        public IActionResult Edit(EntityViewModel vm)
         {
-            if (vm.CategoryOfInterest.Name != null)
+            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            if (vm.EntityOfInterest.Name != null)
             {
-
-                var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                //TODO: Account for the possibility that the user passes a cat ID that is default?
-
+                                
                 //Confirm the user owns the category
-                if (!_categoryRepository.UserOwnsCategory(vm.CategoryOfInterest.CategoryID, userID))
+                if (!_categoryRepository.UserOwnsCategory(vm.EntityOfInterest.EntityID, userID))
                 {
                     return NotFound();
                 }
 
-                if (!_categoryRepository.Get(vm.CategoryOfInterest.CategoryID, userID).IsDefault)
+                //Account for the possibility that the client finds a way to pass category ID that is default.
+                //Can I do this without reaching back to the DB?
+                if (!_categoryRepository.IsDefault(vm.EntityOfInterest.EntityID, userID))
                 {
 
                     //Validate the category
-                    ValidateCategory(vm.CategoryOfInterest, userID);
-
-                    vm.CategoryOfInterest.UserID = userID;
+                    ValidateCategory(vm, userID);
 
                     if (ModelState.IsValid)
                     {
-
+                        //Convert the VMCategory to DBCategory
+                        Category category = new Category
+                        {
+                            CategoryID = vm.EntityOfInterest.EntityID,
+                            UserID = userID,
+                            Name = vm.EntityOfInterest.Name,
+                            IsDisplayed = vm.EntityOfInterest.IsDisplayed,
+                            IsDefault = false //User's cannot edit default categories.
+                        };
+                        
                         //Update the category in the DB
-                        _categoryRepository.Update(vm.CategoryOfInterest);
+                        _categoryRepository.Update(category);
 
                         TempData["Message"] = "Category successfully updated.";
 
@@ -181,21 +194,27 @@ namespace AccountTrackerV2.Controllers
                 return NotFound();
             }
 
-            //Don't allow users to delete a default category.
-            //TODO: Refactor for DI?
-            Category category = new Category();
-            category = _categoryRepository.Get((int)id, userID);
+            //Get the category data
+            Category categoryToDelete = _categoryRepository.Get((int)id, userID);
 
-            if (!category.IsDefault)
+            //Don't allow users to delete a default category.            
+            if (!categoryToDelete.IsDefault)
             {
-                ApplicationViewModel vm = new ApplicationViewModel();
-                vm.CategoryOfInterest = category;
-                vm.AbsorptionCategory = new Category();
-                vm.CategorySelectList = vm.InitCategorySelectList(_categoryRepository, userID);
+                //Convert the DBCategory to a VMCategory
 
-                //TODO: Refactor to remove the need to pass userid
-                vm.AbsorptionCategory.UserID = userID;
-                vm.CategoryOfInterest.UserID = userID;
+                EntityViewModel vm = new EntityViewModel();
+                vm.EntityOfInterest = new EntityViewModel.Entity
+                {
+                    EntityID = categoryToDelete.CategoryID,
+                    Name = categoryToDelete.Name,
+                    IsDisplayed = categoryToDelete.IsDisplayed
+                };
+
+                //Instantiate an absorption category
+                vm.AbsorptionEntity = new EntityViewModel.Entity();
+
+                //Fill the category select list with user owned categories.
+                vm.CategorySelectList = vm.InitCategorySelectList(_categoryRepository, userID);
 
                 return View(vm);
             }
@@ -207,24 +226,25 @@ namespace AccountTrackerV2.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(ApplicationViewModel vm)
+        public IActionResult Delete(EntityViewModel vm)
         {
             bool errorMessageSet = false;
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //Check for absorption category selection.
-            if (vm.AbsorptionCategory.CategoryID != 0)
+            if (vm.AbsorptionEntity.EntityID != 0)
             {
                 //Make sure user owns both the absorbed and absorbing categories
-                if (!_categoryRepository.UserOwnsCategory(vm.CategoryOfInterest.CategoryID, userID) 
-                    || !_categoryRepository.UserOwnsCategory(vm.AbsorptionCategory.CategoryID, userID))
+                if (!_categoryRepository.UserOwnsCategory(vm.EntityOfInterest.EntityID, userID) 
+                    || !_categoryRepository.UserOwnsCategory(vm.AbsorptionEntity.EntityID, userID))
                 {
                     //TODO: Perhaps a more specific message to the user?
                     return NotFound();
                 }
 
-                Category absorbedCategory = _categoryRepository.Get(vm.CategoryOfInterest.CategoryID, userID);
-                Category absorbingCategory = _categoryRepository.Get(vm.AbsorptionCategory.CategoryID, userID);
+                //Convert the VMCategories to DBCategories
+                Category absorbedCategory = _categoryRepository.Get(vm.EntityOfInterest.EntityID, userID);
+                Category absorbingCategory = _categoryRepository.Get(vm.AbsorptionEntity.EntityID, userID);
 
                 //Ensure that the deleted category is not default.
                 if (!absorbedCategory.IsDefault)
@@ -250,16 +270,17 @@ namespace AccountTrackerV2.Controllers
             }
             SetErrorMessage(vm, "You must select a category to absorb transactions related to the category being deleted.", errorMessageSet);
 
-            ApplicationViewModel failureStateVM = new ApplicationViewModel();
+            EntityViewModel failureStateVM = new EntityViewModel();
             
             //TODO: It's possible that the client could adjust the category of interest category ID to a category not owned before posting, which would not be caught by now.
             //TODO: Not a huge deal, as the absorption process will catch this, but it could allow users to see other's categories.
-            failureStateVM.CategoryOfInterest = _categoryRepository.Get(vm.CategoryOfInterest.CategoryID, userID);
+            //TODO: Current approach of passing back the passed in CategoryVm category of interest should resolve this.
+            failureStateVM.EntityOfInterest = vm.EntityOfInterest;
             failureStateVM.CategorySelectList = failureStateVM.InitCategorySelectList(_categoryRepository, userID);
             return View(failureStateVM);
         }
 
-        private void SetErrorMessage(ApplicationViewModel vm, string message, bool messageSet)
+        private void SetErrorMessage(EntityViewModel vm, string message, bool messageSet)
         {
             //If there's already an error message, don't do anything.
             if (!messageSet)
@@ -273,9 +294,9 @@ namespace AccountTrackerV2.Controllers
             }
         }
 
-        private void ValidateCategory(Category category, string userID)
+        private void ValidateCategory(EntityViewModel vm, string userID)
         {
-            if (_categoryRepository.NameExists(category, userID))
+            if (_categoryRepository.NameExists(vm, userID))
             {
                 ModelState.AddModelError("category.Name", "The provided category name already exists.");
             }

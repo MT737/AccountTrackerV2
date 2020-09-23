@@ -1,4 +1,5 @@
 ﻿using AccountTrackerV2.Models;
+using AccountTrackerV2.ViewModels;
 using System.Collections.Generic;
 
 namespace AccountTrackerV2.Interfaces
@@ -11,9 +12,10 @@ namespace AccountTrackerV2.Interfaces
         bool UserOwnsCategory(int categoryId, string userID);
         int GetID(string name, string userID);
         IList<Category> GetList(string userID);
-        bool NameExists(Category category, string userID);
+        bool NameExists(EntityViewModel vm, string userID);
         void CreateDefaults(string userID);
         bool DefaultsExist(string userID);
         decimal GetCategorySpending(int categoryID, string userID);
+        bool IsDefault(int entityID, string userID);
     }
 }

@@ -1,15 +1,14 @@
-﻿@model AccountTrackerV2.Models.Vendor
-
+﻿
 @{
-    ViewData["Title"] = "Add";
+    ViewData["Title"] = "Add Vendor";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>@ViewData["Title"]</h2>
-@using (Html.BeginForm())
-{
-    @Html.HiddenFor(m => m.UserID)
-    @Html.AntiForgeryToken()
+
+<form asp-controller="Vendor" asp-action="Add" asp-antiforgery="true" method="post" role="form">
+    
+    <div asp-validation-summary="All" class="text-danger"></div>
 
     <partial name="_VendorForm.cshtml" />
 
@@ -22,4 +21,4 @@
             </div>
         </div>
     </div>
-}
+</form>

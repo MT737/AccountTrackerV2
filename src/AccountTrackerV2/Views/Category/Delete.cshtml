@@ -1,57 +1,40 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+﻿@model AccountTrackerV2.ViewModels.EntityViewModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Category";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
+<form asp-controller="Category" asp-action="Delete" asp-antiforgery="true" method="post" role="form">
+    
     <!--TODO: Research better way to pass ID back to controller.-->
-    @Html.HiddenFor(m => m.CategoryOfInterest.CategoryID)
+    @Html.HiddenFor(m => m.EntityOfInterest.EntityID)
 
     <div class="row">
-
         <div class="col-md-6">
-
-            <h3>Are you certain you want to delete this category? @Model.CategoryOfInterest.Name</h3>
+            <h3>Are you certain you want to delete this category? @Model.EntityOfInterest.Name</h3>
             <p>This action cannot be undone.</p>
             <p>If so, select a category to absorb all transactions currently associated to the category to be deleted.</p>
-
         </div>
-
     </div>
     <div class="row">
-
         <div class="col-md-6">
-
             <div class="form-group">
-
-                @Html.LabelFor(m => m.AbsorptionCategory.CategoryID, new { @class = "control-label" })
-                @Html.DropDownListFor(m => m.AbsorptionCategory.CategoryID, Model.CategorySelectList, "", new { @class = "form-control" })
-
+                <label asp-for="@Model.AbsorptionEntity.EntityID"></label>
+                <select asp-for="@Model.AbsorptionEntity.EntityID" class="form-control" asp-items="@Model.CategorySelectList"></select>              
             </div>
-
         </div>
-
     </div>
-
     <div class="row">
-
         <div class="col-md-6">
-
             <button type="submit" class="btn btn-danger btn-lg margin-right">
                 <span class="glyphicon glyphicon-trash"></span> Delete
             </button>
-
             <a href="@Url.Action("Index", "Category")" class="btn btn-primary btn-lg marg-right">
                 <span class="glyphicon glyphicon-step-backward"></span>Back
             </a>
-
         </div>
-
     </div>
-}
+</form>

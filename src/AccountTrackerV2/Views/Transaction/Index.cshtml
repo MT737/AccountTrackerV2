@@ -1,4 +1,4 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+﻿@model AccountTrackerV2.ViewModels.TransactionViewModel
 
 @{
     ViewData["Title"] = "Transactions";
@@ -10,7 +10,7 @@
     <div class="col-md-12">
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
         <div class="panel panel-default">
-            <div class="panel-body" style="overflow:scroll">
+            <div class="panel-body" style="overflow:auto">
                 <table class="table">
                     <thead>
                         <tr>

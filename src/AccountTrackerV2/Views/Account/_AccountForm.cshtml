@@ -1,34 +1,34 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+﻿@model AccountTrackerV2.ViewModels.AccountViewModel
 
 <div class="row">
     <div class="col-md-4">
         <div class="form-group">
-            @Html.LabelFor(m => m.AccountOfInterest.Name, new { @class = "control-label" })
-            @Html.TextBoxFor(m => m.AccountOfInterest.Name, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.AccountOfInterest.Name, "", new { @class = "text-danger"})
+            <label asp-for="@Model.AccountOfInterest.Name"></label>
+            <input asp-for="@Model.AccountOfInterest.Name" class="form-control" />
+            <span asp-validation-for="@Model.AccountOfInterest.Name" class="text-danger"></span>
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-2">
         <div class="form-group">
-            @Html.LabelFor(m => m.AccountOfInterest.IsAsset, new { @class = "control-label" })
-            @Html.CheckBoxFor(m => m.AccountOfInterest.IsAsset, new { @class = "form-control" })            
+            <label asp-for="@Model.AccountOfInterest.IsAsset"></label>
+            <input asp-for="@Model.AccountOfInterest.IsAsset" class="form-control" type="checkbox" />
         </div>
     </div>
     <div class="col-md-2">
         <div class="form-group">
-            @Html.LabelFor(m => m.AccountOfInterest.IsActive, new { @class = "control-label" })
-            @Html.CheckBoxFor(m => m.AccountOfInterest.IsActive, new { @class = "form-control" })
+            <label asp-for="@Model.AccountOfInterest.IsActive"></label>
+            <input asp-for="@Model.AccountOfInterest.IsActive" class="form-control" type="checkbox" />
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-4">
         <div class="form-group">
-            @Html.LabelFor(m => m.TransactionOfInterest.Amount, new { @class = "control-label" })
-            @Html.TextBoxFor(m => m.TransactionOfInterest.Amount, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(m => m.TransactionOfInterest.Amount, "Non-zero amount is required. Format: 0.00.", new { @class = "text-danger" })
+            <label asp-for="@Model.AccountTransaction.Amount"></label>
+            <input asp-for="@Model.AccountTransaction.Amount" class="form-control" />
+            <span asp-validation-for="@Model.AccountTransaction.Amount" class="text-danger"></span>
         </div>
     </div>
 </div>

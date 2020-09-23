@@ -1,19 +1,19 @@
-﻿@model AccountTrackerV2.Models.Vendor
+﻿@model AccountTrackerV2.ViewModels.EntityViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Vendor";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>@ViewData["Edit"]</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
 
-    <!--TODO: Research better way to pass transaction ID back to controller.-->
-    @Html.HiddenFor(m => m.VendorID)
-    @Html.HiddenFor(m => m.UserID)
+<form asp-controller="Vendor" asp-action="Edit" asp-antiforgery="true" method="post" role="form">
+    
+    <!--TODO: Research better way to pass Vendor ID back to controller.-->
+    @Html.HiddenFor(m => m.EntityOfInterest.EntityID)
+
+    <div asp-validation-summary="All" class="text-danger"></div>
 
     <partial name="_VendorForm.cshtml" />
 
@@ -26,7 +26,7 @@
             </div>
         </div>
     </div>
-}
+</form>
 
 <div>
     @Html.ActionLink("Back to List", "Index")

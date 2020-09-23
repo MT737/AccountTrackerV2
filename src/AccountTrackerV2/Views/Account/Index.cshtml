@@ -1,4 +1,4 @@
-﻿@model IList<AccountTrackerV2.ViewModels.ApplicationViewModel.AccountWithBalance>
+﻿@model AccountTrackerV2.ViewModels.AccountViewModel
 
 @{
     ViewData["Title"] = "Accounts";
@@ -10,7 +10,7 @@
     <div class="col-md-6">
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
         <div class="panel panel-default">
-            <div class="panel-body">
+            <div class="panel-body" style="overflow:auto">
                 <table class="table">
                     <thead>
                         <tr>
@@ -22,7 +22,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var account in Model)
+                        @foreach (var account in Model.AccountsWithBalances)
                         {
                             <tr>
                                 <td>@account.Name</td>

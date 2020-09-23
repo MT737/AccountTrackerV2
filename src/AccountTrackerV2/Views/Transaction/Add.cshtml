@@ -1,17 +1,14 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
-
-@{
-    ViewData["Title"] = "Add";
+﻿@{
+    ViewData["Title"] = "Add Transaction";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    @Html.HiddenFor(m => m.TransactionOfInterest.UserID)
-
+<form asp-controller="Transaction" asp-action="Add" asp-antiforgery="true" method="post" role="form">
+    
+    <div asp-validation-summary="All" class="text-danger"></div>
+    
     <partial name="_TransactionForm.cshtml" />
 
     <div class="form-horizontal">
@@ -22,8 +19,9 @@
             </div>
         </div>
     </div>
-}
+</form>
 
-<div>
+
+<div>    
     @Html.ActionLink("Back to List", "Index")
 </div>

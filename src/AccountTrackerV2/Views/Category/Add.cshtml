@@ -1,17 +1,13 @@
-﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
-
-@{
-    ViewData["Title"] = "Add";
+﻿@{
+    ViewData["Title"] = "Add Category";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <h2>@ViewData["Title"]</h2>
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    <!--TODO: Research better way to pass transaction ID back to controller.-->
-    @Html.HiddenFor(m => m.CategoryOfInterest.UserID)
+<form asp-controller="Category" asp-action="Add" asp-antiforgery="true" method="post" role="form">
+
+    <div asp-validation-summary="All" class="text-danger"></div>
 
     <partial name="_CategoryForm.cshtml" />
 
@@ -24,8 +20,7 @@
             </div>
         </div>
     </div>
-}
-
+</form>
 <div>
     @Html.ActionLink("Back to List", "Index")
 </div>

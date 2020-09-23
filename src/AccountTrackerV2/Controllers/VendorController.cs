@@ -26,47 +26,50 @@ namespace AccountTrackerV2.Controllers
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IList<Vendor> vendors = new List<Vendor>();
-            vendors = _vendorRepository.GetList(userID);
+            //TODO: Add the VMs to services for DI?
+            EntityViewModel vm = new EntityViewModel();
+            vm.Vendors = _vendorRepository.GetList(userID);
 
             //If vendor list is 0, then this is likely a new user. Fill the default vendor list.
-            if (vendors.Count == 0)
+            if (vm.Vendors.Count == 0)
             {
                 _vendorRepository.CreateDefaults(userID);
-                vendors = _vendorRepository.GetList(userID);
+                vm.Vendors = _vendorRepository.GetList(userID);
             }
 
-            return View(vendors);
+            return View(vm);
         }
 
         public IActionResult Add()
-        {
-            var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        {   EntityViewModel vm = new EntityViewModel();
+            vm.EntityOfInterest = new EntityViewModel.Entity();
 
-            Vendor vendor = new Vendor();
-
-            //TODO: Refactor to remove need to pass userID.
-            vendor.UserID = userID;
-            return View(vendor);
+            return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Add(Vendor vendor)
+        public IActionResult Add(EntityViewModel vm)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            //Don't allow users to add a default vendor. Shouldn't be allowed by the UI, but making sure here.
-            vendor.IsDefault = false;
-
-            if (vendor.Name != null)
+                        
+            if (vm.EntityOfInterest.Name != null)
             {
-                //TODO: Test trying to add a vendor by navigating directly to the page without input.            
+                //TODO: Test trying to add a vendor by navigating directly to the post without input.            
                 
-                ValidateVendor(vendor, userID);
+                ValidateVendor(vm, userID);
 
                 if (ModelState.IsValid)
                 {
+                    //Convert VMVendor to DBVendor
+                    Vendor vendor = new Vendor
+                    {
+                        UserID = userID,
+                        Name = vm.EntityOfInterest.Name,
+                        IsDisplayed = vm.EntityOfInterest.IsDisplayed,
+                        IsDefault = false //User's cannot create default vendors.
+                    };                    
+
                     //Add vendor to the DB
                     _vendorRepository.Add(vendor);
 
@@ -76,9 +79,7 @@ namespace AccountTrackerV2.Controllers
                 }
             }
 
-            //TODO: Refactor to remove the need to pass userID
-            vendor.UserID = userID;
-            return View(vendor);
+            return View(vm);
         }
 
         public IActionResult Edit(int? id)
@@ -96,13 +97,22 @@ namespace AccountTrackerV2.Controllers
                 return NotFound();
             }
 
-            //Don't allow users to edit default vendors.
+            //Get the vendor data
             Vendor vendor = _vendorRepository.Get((int)id, userID);
+            
+            //Don't allow users to edit default vendors.
             if (!vendor.IsDefault)
             {
-                //TODO: Refactor to avoid having to pass UserID.
-                vendor.UserID = userID;
-                return View(vendor);
+                //Convert DBVendor to VMVendor
+                EntityViewModel vm = new EntityViewModel();
+                vm.EntityOfInterest = new EntityViewModel.Entity
+                {
+                    EntityID = vendor.VendorID,
+                    Name = vendor.Name,
+                    IsDisplayed = vendor.IsDisplayed
+                };
+
+                return View(vm);
             }
 
             TempData["Message"] = "Adjustment of default vendor is not allow.";
@@ -112,30 +122,38 @@ namespace AccountTrackerV2.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Vendor vendor)
+        public IActionResult Edit(EntityViewModel vm)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (vendor.Name != null)
+            if (vm.EntityOfInterest.Name != null)
             {
 
-                //TODO: Account for the possibility that the user passes a vendor ID that is default?
-
                 //Confirm the user owns the vendor
-                if (!_vendorRepository.UserOwnsVendor(vendor.VendorID, userID))
+                if (!_vendorRepository.UserOwnsVendor(vm.EntityOfInterest.EntityID, userID))
                 {
                     return NotFound();
                 }
 
-                if (!vendor.IsDefault)
+                //Account for the possibility that the client finds a way to pass a vendor ID that is default.
+                //Can I do this without reaching back out to the DB? 
+                if (!_vendorRepository.IsDefault(vm.EntityOfInterest.EntityID, userID))
                 {
 
                     //Validate vendor
-                    ValidateVendor(vendor, userID);
-
+                    ValidateVendor(vm, userID);
+                                        
                     if (ModelState.IsValid)
                     {
-                        vendor.UserID = userID;
+                        //Convert the VMVendor to DBVendor
+                        Vendor vendor = new Vendor
+                        {
+                            VendorID = vm.EntityOfInterest.EntityID,
+                            UserID = userID,
+                            Name = vm.EntityOfInterest.Name,
+                            IsDisplayed = vm.EntityOfInterest.IsDisplayed,
+                            IsDefault = false //User's cannot edit default vendors.
+                        };
 
                         //Update the Vendor in the DB
                         _vendorRepository.Update(vendor);
@@ -147,7 +165,7 @@ namespace AccountTrackerV2.Controllers
                 }                
             }
 
-            return View(vendor);
+            return View(vm);
         }
 
         public IActionResult Delete(int? id)
@@ -165,20 +183,26 @@ namespace AccountTrackerV2.Controllers
                 return NotFound();
             }
 
-            //Don't allow users to delete a default vendor
-            //TODO: Refactor for DI?
+            //Get the vendor data
             Vendor vendorToDelete = _vendorRepository.Get((int)id, userID);
+            
+            //Don't allow users to delete a default vendor            
             if (!vendorToDelete.IsDefault)
             {
-                //Instantiate a vm to hold vendor to delete, vendor select list, and vendor to absorb.
-                ApplicationViewModel vm = new ApplicationViewModel();
-                vm.VendorOfInterest = vendorToDelete;
-                vm.AbsorptionVendor = new Vendor();
-                vm.VendorSelectList = vm.InitVendorSelectList(_vendorRepository, userID);
+                //Convert the DBVendor to a VMVendor
+                EntityViewModel vm = new EntityViewModel();
+                vm.EntityOfInterest = new EntityViewModel.Entity
+                {
+                    EntityID = vendorToDelete.VendorID,
+                    Name = vendorToDelete.Name,
+                    IsDisplayed = vendorToDelete.IsDisplayed
+                };
+                
+                //Instantiate an absorption VMVendor
+                vm.AbsorptionEntity = new EntityViewModel.Entity();
 
-                //TODO: Refactor to remove the need to pass UserID
-                vm.VendorOfInterest.UserID = userID;
-                vm.AbsorptionVendor.UserID = userID;
+                //Fill the vendor select list with user owned vendors.
+                vm.VendorSelectList = vm.InitVendorSelectList(_vendorRepository, userID);
                 
                 return View(vm);
             }
@@ -190,24 +214,25 @@ namespace AccountTrackerV2.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(ApplicationViewModel vm)
+        public IActionResult Delete(EntityViewModel vm)
         {
             bool errorMessageSet = false;
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //Check for absorption vendor selection.
-            if (vm.AbsorptionVendor.VendorID != 0)
+            if (vm.AbsorptionEntity.EntityID != 0)
             {
                 //Make sure the user owns both the absorbed and absorbing vendors
-                if (!_vendorRepository.UserOwnsVendor(vm.VendorOfInterest.VendorID, userID)
-                    || !_vendorRepository.UserOwnsVendor(vm.AbsorptionVendor.VendorID, userID))
+                if (!_vendorRepository.UserOwnsVendor(vm.EntityOfInterest.EntityID, userID)
+                    || !_vendorRepository.UserOwnsVendor(vm.AbsorptionEntity.EntityID, userID))
                 {
                     //TODO: Perhaps a more specific message to the user?
                     return NotFound();
                 }
 
-                Vendor absorbedVendor = _vendorRepository.Get(vm.VendorOfInterest.VendorID, userID);
-                Vendor absorbingVendor = _vendorRepository.Get(vm.AbsorptionVendor.VendorID, userID);
+                //Convert the VMVendors to DBVendors
+                Vendor absorbedVendor = _vendorRepository.Get(vm.EntityOfInterest.EntityID, userID);
+                Vendor absorbingVendor = _vendorRepository.Get(vm.AbsorptionEntity.EntityID, userID);
 
                 //Ensure that the deleted vendor is not default.
                 if (!absorbedVendor.IsDefault)
@@ -233,16 +258,17 @@ namespace AccountTrackerV2.Controllers
             }
             SetErrorMessage(vm, "You must select a vendor to absorb transactions related to the vendor being deleted.", errorMessageSet);
 
-            ApplicationViewModel failureStateVM = new ApplicationViewModel();
+            EntityViewModel failureStateVM = new EntityViewModel();
 
             //TODO: It's possible that the client could adjust the vendor of interest vendor ID to a vendor not owned before posting, which would not be caught by now.
-            //TODO: Not a huge deal, as the absorption process will catch this, but it could allow users to see other's vendors.
-            failureStateVM.VendorOfInterest = _vendorRepository.Get(vm.VendorOfInterest.VendorID, userID);
+            //TODO: Not a huge deal, as the absorption process will catch this, but it could allow users to see unowned vendors.
+            //TODO: Current approach of passing back the passed in VendorVM vendor of interest should resolve this.
+            failureStateVM.EntityOfInterest = vm.EntityOfInterest;
             failureStateVM.VendorSelectList = failureStateVM.InitVendorSelectList(_vendorRepository, userID);
             return View(failureStateVM);
         }
 
-        private void SetErrorMessage(ApplicationViewModel vm, string message, bool messageSet)
+        private void SetErrorMessage(EntityViewModel vm, string message, bool messageSet)
         {
             //If there's already an error message, don't do anything.
             if (!messageSet)
@@ -256,9 +282,9 @@ namespace AccountTrackerV2.Controllers
             }
         }
 
-        private void ValidateVendor(Vendor vendor, string userID)
+        private void ValidateVendor(EntityViewModel vm, string userID)
         {
-            if (_vendorRepository.NameExists(vendor, userID))
+            if (_vendorRepository.NameExists(vm, userID))
             {
                 ModelState.AddModelError("Name", "The provided vendor name already exists.");
             }

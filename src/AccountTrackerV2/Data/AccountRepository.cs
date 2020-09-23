@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AccountTrackerV2.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using AccountTrackerV2.ViewModels;
 
 namespace AccountTrackerV2.Data
 {
@@ -116,10 +117,10 @@ namespace AccountTrackerV2.Data
         /// <param name="account">Account: account object of which the name existence is desired.</param>
         /// <param name="userID">String: UserID of the account.</param>
         /// <returns></returns>
-        public bool NameExists(Account account, string userID)
+        public bool NameExists(AccountViewModel vm, string userID)
         {
             return Context.Accounts
-                 .Where(a => a.UserID == userID && a.Name.ToLower() == account.Name.ToLower() && a.AccountID != account.AccountID)
+                 .Where(a => a.UserID == userID && a.Name.ToLower() == vm.AccountOfInterest.Name.ToLower() && a.AccountID != vm.AccountOfInterest.AccountID)
                  .Any();
         }
 
