@@ -1,0 +1,43 @@
+﻿@model IList<AccountTrackerV2.ViewModels.ApplicationViewModel.AccountWithBalance>
+
+@{
+    ViewData["Title"] = "Accounts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="~/Views/Shared/_Message.cshtml" />
+<div class="row">
+    <div class="col-md-6">
+        <partial name="~/Views/Shared/_IndexHeading.cshtml" />
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Account</th>
+                            <th>Balance</th>
+                            <th>Asset</th>
+                            <th>Active</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var account in Model)
+                        {
+                            <tr>
+                                <td>@account.Name</td>
+                                <td style="text-align: right">$@account.Balance.ToString("#,##0.00")</td>
+                                <td>@account.IsAsset</td>
+                                <td>@account.IsActive</td>
+                                <td>
+                                    <a href="@Url.Action("Edit", "Account", new { id = account.AccountID })" />
+                                    <span class="fas fa-edit"></span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

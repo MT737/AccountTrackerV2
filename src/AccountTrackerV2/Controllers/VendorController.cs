@@ -29,6 +29,13 @@ namespace AccountTrackerV2.Controllers
             IList<Vendor> vendors = new List<Vendor>();
             vendors = _vendorRepository.GetList(userID);
 
+            //If vendor list is 0, then this is likely a new user. Fill the default vendor list.
+            if (vendors.Count == 0)
+            {
+                _vendorRepository.CreateDefaults(userID);
+                vendors = _vendorRepository.GetList(userID);
+            }
+
             return View(vendors);
         }
 
@@ -90,7 +97,7 @@ namespace AccountTrackerV2.Controllers
             }
 
             //Don't allow users to edit default vendors.
-            Vendor vendor = _vendorRepository.Get((int)id);
+            Vendor vendor = _vendorRepository.Get((int)id, userID);
             if (!vendor.IsDefault)
             {
                 //TODO: Refactor to avoid having to pass UserID.
@@ -160,7 +167,7 @@ namespace AccountTrackerV2.Controllers
 
             //Don't allow users to delete a default vendor
             //TODO: Refactor for DI?
-            Vendor vendorToDelete = _vendorRepository.Get((int)id);
+            Vendor vendorToDelete = _vendorRepository.Get((int)id, userID);
             if (!vendorToDelete.IsDefault)
             {
                 //Instantiate a vm to hold vendor to delete, vendor select list, and vendor to absorb.
@@ -172,7 +179,7 @@ namespace AccountTrackerV2.Controllers
                 //TODO: Refactor to remove the need to pass UserID
                 vm.VendorOfInterest.UserID = userID;
                 vm.AbsorptionVendor.UserID = userID;
-
+                
                 return View(vm);
             }
 
@@ -199,8 +206,8 @@ namespace AccountTrackerV2.Controllers
                     return NotFound();
                 }
 
-                Vendor absorbedVendor = _vendorRepository.Get(vm.VendorOfInterest.VendorID);
-                Vendor absorbingVendor = _vendorRepository.Get(vm.AbsorptionVendor.VendorID);
+                Vendor absorbedVendor = _vendorRepository.Get(vm.VendorOfInterest.VendorID, userID);
+                Vendor absorbingVendor = _vendorRepository.Get(vm.AbsorptionVendor.VendorID, userID);
 
                 //Ensure that the deleted vendor is not default.
                 if (!absorbedVendor.IsDefault)
@@ -230,7 +237,7 @@ namespace AccountTrackerV2.Controllers
 
             //TODO: It's possible that the client could adjust the vendor of interest vendor ID to a vendor not owned before posting, which would not be caught by now.
             //TODO: Not a huge deal, as the absorption process will catch this, but it could allow users to see other's vendors.
-            failureStateVM.VendorOfInterest = _vendorRepository.Get(vm.VendorOfInterest.VendorID);
+            failureStateVM.VendorOfInterest = _vendorRepository.Get(vm.VendorOfInterest.VendorID, userID);
             failureStateVM.VendorSelectList = failureStateVM.InitVendorSelectList(_vendorRepository, userID);
             return View(failureStateVM);
         }

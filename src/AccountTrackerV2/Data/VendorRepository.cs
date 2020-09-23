@@ -13,17 +13,19 @@ namespace AccountTrackerV2.Data
         {
         }
 
+        //TODO: Update XML
+
         /// <summary>
         /// Returns the Vendor entity associated to the passed vendor ID.
         /// </summary>
         /// <param name="id">Int: VendorID associated to the desired vendor.</param>
         /// <returns>Vendor entity with the passed VendorID.</returns>
-        public Vendor Get(int id)
+        public Vendor Get(int id, string userID)
         {
             var vendor = Context.Vendors.AsQueryable();
 
             return vendor
-                .Where(v => v.VendorID == id)
+                .Where(v => v.VendorID == id && v.UserID == userID)
                 .SingleOrDefault();
         }
 
@@ -44,9 +46,9 @@ namespace AccountTrackerV2.Data
         /// Returns the number of vendors in the DB.
         /// </summary>
         /// <returns>Int: integer representing the number of vendors in the DB.</returns>
-        public int GetCount()
+        public int GetCount(string userID)
         {
-            return Context.Vendors.Count();
+            return Context.Vendors.Where(v => v.UserID == userID).Count();
         }
 
         /// <summary>
@@ -91,10 +93,10 @@ namespace AccountTrackerV2.Data
         /// </summary>
         /// <param name="name">String: Vendor name for which to retrieve a VendorID.</param>
         /// <returns>Int: VendorID associated to the passed vendor name.</returns>
-        public int GetID(string name)
+        public int GetID(string name, string userID)
         {
             return Context.Vendors
-                .Where(v => v.Name == name)
+                .Where(v => v.Name == name && v.UserID == userID)
                 .SingleOrDefault().VendorID;
         }
 
@@ -115,6 +117,26 @@ namespace AccountTrackerV2.Data
                 transaction.VendorID = absorbingID;
             }
             Context.SaveChanges();
+        }
+
+        public void CreateDefaults(string userID)
+        {
+            if (!DefaultsExist(userID)) //Preventing duplication of defaults.
+            {                
+                Vendor vend = new Vendor
+                    {
+                        UserID = userID,
+                        Name = "N/A",
+                        IsDefault = true,
+                        IsDisplayed = true
+                    };
+                Add(vend);                
+            }
+        }
+
+        public bool DefaultsExist(string userID)
+        {
+            return Context.Vendors.Where(v => v.UserID == userID && v.IsDefault == true).Any();
         }
 
     }

@@ -1,0 +1,60 @@
+﻿@model IList<AccountTrackerV2.Models.Vendor>
+
+@{
+    ViewData["Title"] = "Vendors";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="~/Views/Shared/_Message.cshtml" />
+<div class="row">
+    <div class="col-md-6">
+        <partial name="~/Views/Shared/_IndexHeading.cshtml" />
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Vendor</th>
+                            <th>Default</th>
+                            <th>Displayed</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var vendor in Model)
+                        {
+                        <tr>
+                            <td>@vendor.Name</td>
+                            <td>@vendor.IsDefault</td>
+                            <td>@vendor.IsDisplayed</td>
+                            @if (!vendor.IsDefault)
+                            {
+
+                                <td>
+                                    <a href="@Url.Action("Edit", "Vendor", new {id = vendor.VendorID})" />
+                                    <span class="fas fa-edit"></span>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Delete", "Vendor", new {id = vendor.VendorID})" />
+                                    <span class="fas fa-trash-alt"></span>
+                                </td>
+
+                            }
+                            else
+                            {
+                                <td>
+                                    <span class="fas fa-ban"></span>
+                                </td>
+                                <td>
+                                    <span class="fas fa-ban"></span>
+                                </td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

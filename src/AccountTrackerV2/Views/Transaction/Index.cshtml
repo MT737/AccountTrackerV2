@@ -1,0 +1,54 @@
+﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+
+@{
+    ViewData["Title"] = "Transactions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="~/Views/Shared/_Message.cshtml" />
+<div class="row">
+    <div class="col-md-12">
+        <partial name="~/Views/Shared/_IndexHeading.cshtml" />
+        <div class="panel panel-default">
+            <div class="panel-body" style="overflow:scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th class="hidden-xs">Type</th>
+                            <th>Account</th>
+                            <th class="hidden-xs hidden-sm">Category</th>
+                            <th class="hidden-xs hidden-sm">Vendor</th>
+                            <th>Amount</th>
+                            <th class="hidden-xs hidden-sm">Description</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in Model.Transactions)
+                        {
+                            <tr>
+                                <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
+                                <td class="hidden-xs">@transaction.TransactionType.Name</td>
+                                <td>@transaction.Account.Name</td>
+                                <td class="hidden-xs hidden-sm">@transaction.Category.Name</td>
+                                <td class="hidden-xs hidden-sm">@transaction.Vendor.Name</td>
+                                <td style="text-align: right">$@transaction.Amount.ToString("#,##0.00")</td>
+                                <td class="hidden-xs hidden-sm">@transaction.Description</td>
+                                <td>
+                                    <a href="@Url.Action("Edit", "Transaction", new { id = transaction.TransactionID })" />
+                                    <span class="fas fa-edit"></span>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Delete", "Transaction", new { id = transaction.TransactionID })" />
+                                    <span class="fas fa-trash-alt"></span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AccountTrackerV2.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccountTrackerV2.Data
 {
@@ -20,21 +21,15 @@ namespace AccountTrackerV2.Data
         /// <param name="userID">String: UserID</param>
         /// <param name="includeRelatedEntities">Bool: boolean indicator of desire to include additional transaction details.</param>
         /// <returns>Returns a transaction entity and includes related entities if includeRelatedEntities = true.</returns>
-        public Transaction Get(int id, string userID, bool includeRelatedEntities = true)
+        public Transaction Get(int id, string userID)
         {
             var transaction = Context.Transactions.AsQueryable();
-
-            //TODO: EFcore issue with .include again. If It's true that navigation properties are automatically included now, then the "includeRelatedEntities" parameter is no longer necessary to include.
-            //if (includeRelatedEntities)
-            //{
-            //    transaction = transaction
-            //        .Include(tt => tt.TransactionType)
-            //        .ThenInclude(a => a.Account)
-            //        .Include(c => c.Category)
-            //        .Include(v => v.Vendor);
-            //}
-
+            
             return transaction
+                .Include(t => t.TransactionType)
+                .Include(t => t.Account)
+                .Include(t => t.Category)
+                .Include(t => t.Vendor)
                 .Where(t => t.TransactionID == id && t.UserID == userID)
                 .SingleOrDefault();
         }
@@ -46,10 +41,7 @@ namespace AccountTrackerV2.Data
         /// <returns>Returns IList of Transaction entities.</returns>
         public IList<Transaction> GetList(string userID)
         {
-            //TODO: See point about efcore and .include.
             return Context.Transactions
-                //.Include(tt => tt.TransactionType)
-                //.Include(a => a.Account)
                 .Where(t => t.UserID == userID)
                 .OrderByDescending(t => t.TransactionID)
                 .ToList();

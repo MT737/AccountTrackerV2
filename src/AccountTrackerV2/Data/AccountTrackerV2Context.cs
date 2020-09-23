@@ -34,13 +34,40 @@ namespace AccountTrackerV2.Data
                 new TransactionType { TransactionTypeID = 1, Name = "Payment From" },
                 new TransactionType { TransactionTypeID = 2, Name = "Payment To" }
                 );
-            
-            //This method of setting cascade behavior in EFCore is not working properly. Cascade on delete was removed by making manual edits to the CreatedAppDataTables migration.
-            //builder.Entity<Transaction>()
-            //    .HasOne(x => x.Category)
-            //    .WithMany()
-            //    .HasForeignKey(x => x.CategoryID)
-            //    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity("AccountTrackerV2.Models.Transaction", b =>
+            {
+                b.HasOne("AccountTrackerV2.Models.Account", "Account")
+                    .WithMany("Transactions")
+                    .HasForeignKey("AccountID")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.HasOne("AccountTrackerV2.Models.Category", "Category")
+                    .WithMany("Transactions")
+                    .HasForeignKey("CategoryID")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.HasOne("AccountTrackerV2.Models.TransactionType", "TransactionType")
+                    .WithMany("Transactions")
+                    .HasForeignKey("TransactionTypeID")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
+                    .WithMany()
+                    .HasForeignKey("UserID")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+
+                b.HasOne("AccountTrackerV2.Models.Vendor", "Vendor")
+                    .WithMany("Transactions")
+                    .HasForeignKey("VendorID")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired();
+            });
+
         }
     }
 }

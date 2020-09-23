@@ -142,7 +142,7 @@ namespace AccountTrackerV2.Controllers
             foreach (var transaction in _transactionRepository.GetList(userID))
             {
                 //Get the detailed data for each transaction and add it to the IList of transactions
-                transactions.Add(_transactionRepository.Get(transaction.TransactionID, userID, true));
+                transactions.Add(_transactionRepository.Get(transaction.TransactionID, userID));
             }
 
             return transactions;

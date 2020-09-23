@@ -13,18 +13,19 @@ namespace AccountTrackerV2.Data
         {
         }
 
+        //TODO: Update all XML.
 
         /// <summary>
         /// Returns the category for the specified ID.
         /// </summary>
         /// <param name="id">Int: ID of the category to return.</param>
         /// <returns>A Category entity</returns>
-        public Category Get(int id)
+        public Category Get(int id, string userID)
         {
             var category = Context.Categories.AsQueryable();
 
             return category
-                .Where(c => c.CategoryID == id)
+                .Where(c => c.CategoryID == id && c.UserID == userID)
                 .SingleOrDefault();
         }
 
@@ -91,10 +92,10 @@ namespace AccountTrackerV2.Data
         /// </summary>
         /// <param name="name">String: Name of the category for which to determine the ID.</param>
         /// <returns>Int: Id for the specified category.</returns>
-        public int GetID(string name)
+        public int GetID(string name, string userID)
         {
             return Context.Categories
-                .Where(c => c.Name == name)
+                .Where(c => c.Name == name && c.UserID == userID)
                 .SingleOrDefault().CategoryID;
         }
 
@@ -115,6 +116,32 @@ namespace AccountTrackerV2.Data
                 transaction.CategoryID = absorbingID;
             }
             Context.SaveChanges();
+        }
+
+        public void CreateDefaults(string userID)
+        {
+            if (!DefaultsExist(userID)) //Preventing duplication of defaults.
+            {
+                string[] categories = new string[] {"Account Transfer", "Account Correction", "New Account", "ATM Withdrawal", "Eating Out",
+                "Entertainment", "Gas", "Groceries/Sundries", "Shopping", "Returns/Deposits", "Other"};
+
+                foreach (string category in categories)
+                {
+                    Category cat = new Category
+                    {
+                        UserID = userID,
+                        Name = category,
+                        IsDefault = true,
+                        IsDisplayed = true
+                    };
+                    Add(cat);
+                } 
+            }
+        }
+
+        public bool DefaultsExist(string userID)
+        {
+            return Context.Categories.Where(c => c.UserID == userID && c.IsDefault == true).Any();
         }
     }
 }

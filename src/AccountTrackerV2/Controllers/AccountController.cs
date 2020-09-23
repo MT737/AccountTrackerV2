@@ -47,6 +47,14 @@ namespace AccountTrackerV2.Controllers
             IList<ApplicationViewModel.AccountWithBalance> accounts = new List<ApplicationViewModel.AccountWithBalance>();
             accounts = GetAccountWithBalances(userID);
 
+            //TODO: May want to reconsider this placement. Could create a drag to keep pinging the DB if the user doesn't create an account.
+            //If no accounts, this is likely a new user. Run the default builders.
+            if (accounts.Count == 0)
+            {
+                _vendorRepository.CreateDefaults(userID);
+                _categoryRepository.CreateDefaults(userID);                
+            }
+
             return View(accounts);
         }
 
@@ -90,7 +98,7 @@ namespace AccountTrackerV2.Controllers
                     _accountRepository.Add(account);
 
                     //Add a transaction to the transaction table in the DB to create the initial account balance.                
-                    CompleteAccountTransaction(vm, true);
+                    CompleteAccountTransaction(vm, true, userID);
                     _transactionRepository.Add(vm.TransactionOfInterest);
 
                     TempData["Message"] = "Account successfully added.";
@@ -166,7 +174,7 @@ namespace AccountTrackerV2.Controllers
                         vm.TransactionOfInterest.Amount = vm.TransactionOfInterest.Amount - currentBalance;
 
                         //Add a transaction to the transaction table in the DB to create an account balance adjustment transaction.                
-                        CompleteAccountTransaction(vm, false);
+                        CompleteAccountTransaction(vm, false, userID);
                         _transactionRepository.Add(vm.TransactionOfInterest);
 
                     }
@@ -199,30 +207,30 @@ namespace AccountTrackerV2.Controllers
         /// </summary>
         /// <param name="vm">ViewModel: viewmodel entity containing the required transaction and account information.</param>
         /// <param name="newAccount">Bool: indication as to if the account is new.</param>
-        private void CompleteAccountTransaction(ApplicationViewModel vm, bool newAccount)
+        private void CompleteAccountTransaction(ApplicationViewModel vm, bool newAccount, string userID)
         {
             vm.TransactionOfInterest.AccountID = _accountRepository.GetID(vm.AccountOfInterest.Name, vm.AccountOfInterest.UserID);
-            vm.TransactionOfInterest.VendorID = _vendorRepository.GetID("N/A");
+            vm.TransactionOfInterest.VendorID = _vendorRepository.GetID("N/A", userID);
             vm.TransactionOfInterest.TransactionDate = DateTime.Now.Date;
 
             if (newAccount)
             {
-                vm.TransactionOfInterest.CategoryID = _categoryRepository.GetID("New Account");
+                vm.TransactionOfInterest.CategoryID = _categoryRepository.GetID("New Account", userID);
                 vm.TransactionOfInterest.Description = "New Account";
             }
             else
             {
-                vm.TransactionOfInterest.CategoryID = _categoryRepository.GetID("Account Correction");
+                vm.TransactionOfInterest.CategoryID = _categoryRepository.GetID("Account Correction", userID);
                 vm.TransactionOfInterest.Description = "Account Balance Adjustment";
             }
 
             if (vm.AccountOfInterest.IsAsset)
             {
-                vm.TransactionOfInterest.TransactionTypeID = _transactionTypeRepository.GetID("Payment To");
+                vm.TransactionOfInterest.TransactionTypeID = _transactionTypeRepository.GetTransactionType("Payment To").TransactionTypeID;
             }
             else
             {
-                vm.TransactionOfInterest.TransactionTypeID = _transactionTypeRepository.GetID("Payment From");
+                vm.TransactionOfInterest.TransactionTypeID = _transactionTypeRepository.GetTransactionType("Payment From").TransactionTypeID;
             }
         }
 

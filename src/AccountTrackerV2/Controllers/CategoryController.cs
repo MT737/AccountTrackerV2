@@ -32,6 +32,14 @@ namespace AccountTrackerV2.Controllers
             //TODO: Refactor for DI?
             IList<Category> categories = new List<Category>();        
             categories = _categoryRepository.GetList(userID);
+
+            //If categories list is 0, then this is likely a new user. Fill the default categories.
+            if (categories.Count == 0)
+            {
+                _categoryRepository.CreateDefaults(userID);
+                categories = _categoryRepository.GetList(userID);
+            }
+
             return View(categories);
         }
 
@@ -93,7 +101,7 @@ namespace AccountTrackerV2.Controllers
             }
 
             //Don't allow users to edit a default category. Should be prevented by the UI, but confirming here. 
-            Category category = _categoryRepository.Get((int)id);
+            Category category = _categoryRepository.Get((int)id, userID);
             if (!category.IsDefault)
             {
                 //TODO: Refactor for DI?
@@ -106,6 +114,7 @@ namespace AccountTrackerV2.Controllers
                 return View(vm);
             }
 
+            //TODO: Review if it makes more sense to use the ErrorViewModel for these...
             TempData["Message"] = "Adjustment of default categories is not allowed.";
 
             return RedirectToAction("Index");
@@ -129,15 +138,16 @@ namespace AccountTrackerV2.Controllers
                     return NotFound();
                 }
 
-                if (!_categoryRepository.Get(vm.CategoryOfInterest.CategoryID).IsDefault)
+                if (!_categoryRepository.Get(vm.CategoryOfInterest.CategoryID, userID).IsDefault)
                 {
 
                     //Validate the category
                     ValidateCategory(vm.CategoryOfInterest, userID);
 
+                    vm.CategoryOfInterest.UserID = userID;
+
                     if (ModelState.IsValid)
                     {
-                        vm.CategoryOfInterest.UserID = userID;
 
                         //Update the category in the DB
                         _categoryRepository.Update(vm.CategoryOfInterest);
@@ -174,7 +184,7 @@ namespace AccountTrackerV2.Controllers
             //Don't allow users to delete a default category.
             //TODO: Refactor for DI?
             Category category = new Category();
-            category = _categoryRepository.Get((int)id);
+            category = _categoryRepository.Get((int)id, userID);
 
             if (!category.IsDefault)
             {
@@ -213,8 +223,8 @@ namespace AccountTrackerV2.Controllers
                     return NotFound();
                 }
 
-                Category absorbedCategory = _categoryRepository.Get(vm.CategoryOfInterest.CategoryID);
-                Category absorbingCategory = _categoryRepository.Get(vm.AbsorptionCategory.CategoryID);
+                Category absorbedCategory = _categoryRepository.Get(vm.CategoryOfInterest.CategoryID, userID);
+                Category absorbingCategory = _categoryRepository.Get(vm.AbsorptionCategory.CategoryID, userID);
 
                 //Ensure that the deleted category is not default.
                 if (!absorbedCategory.IsDefault)
@@ -244,7 +254,7 @@ namespace AccountTrackerV2.Controllers
             
             //TODO: It's possible that the client could adjust the category of interest category ID to a category not owned before posting, which would not be caught by now.
             //TODO: Not a huge deal, as the absorption process will catch this, but it could allow users to see other's categories.
-            failureStateVM.CategoryOfInterest = _categoryRepository.Get(vm.CategoryOfInterest.CategoryID);
+            failureStateVM.CategoryOfInterest = _categoryRepository.Get(vm.CategoryOfInterest.CategoryID, userID);
             failureStateVM.CategorySelectList = failureStateVM.InitCategorySelectList(_categoryRepository, userID);
             return View(failureStateVM);
         }

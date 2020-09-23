@@ -71,7 +71,7 @@ namespace AccountTrackerV2.ViewModels
 
         public SelectList InitVendorSelectList(IVendorRepository vendorRepository, string userID)
         {
-            return new SelectList(vendorRepository.GetList(userID), "VendorId", "Name");
+            return new SelectList(vendorRepository.GetList(userID), "VendorID", "Name");
         }
 
     }

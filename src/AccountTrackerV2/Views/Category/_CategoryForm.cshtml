@@ -1,0 +1,15 @@
+﻿@model AccountTrackerV2.ViewModels.ApplicationViewModel
+<div class="row">
+    <div class="form-group">
+        @Html.LabelFor(m => m.CategoryOfInterest.Name, new { @class = "control-label" })
+        @Html.TextBoxFor(m => m.CategoryOfInterest.Name, "", new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.CategoryOfInterest.Name, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="row">
+    <div class="form-group">
+        @Html.LabelFor(m => m.CategoryOfInterest.IsDisplayed, new { @class = "control-label" })
+        @Html.CheckBoxFor(m => m.CategoryOfInterest.IsDisplayed, new { @class = "form-control" })
+    </div>
+</div>
+

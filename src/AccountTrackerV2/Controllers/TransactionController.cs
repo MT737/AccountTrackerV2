@@ -15,6 +15,8 @@ namespace AccountTrackerV2.Controllers
 {
     public class TransactionController : Controller
     {
+        //TODO: Need to account for instances where the user deletes their account! Cascade delete works for all other tables but transactions!
+
         private IAccountRepository _accountRepository = null;
         private ICategoryRepository _categoryRepository = null;
         private ITransactionRepository _transactionRepository = null;
@@ -35,6 +37,8 @@ namespace AccountTrackerV2.Controllers
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            //TODO: tell user to create an account if none exist.
+
             //Instantiate viewmodel
             //TODO: Refactor for DI?
             var vm = new ApplicationViewModel();
@@ -42,12 +46,16 @@ namespace AccountTrackerV2.Controllers
             //Complete viewmodel property required for transaction view
             vm.Transactions = GetTransactionsWithDetails(userID);
 
+            //TODO: If no transactions, inform the user to create an account.
+
             return View(vm);
         }
 
         public IActionResult Add()
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            //TODO: add a check for an account and warn the user to create one if none exist.
 
             //Instantiate viewmodel
             var vm = new ApplicationViewModel();
@@ -101,7 +109,7 @@ namespace AccountTrackerV2.Controllers
             }
 
             //Get transaction if it exists.
-            Transaction transaction = _transactionRepository.Get((int)id, userID, true);
+            Transaction transaction = _transactionRepository.Get((int)id, userID);
 
             //Confirm transaction exists. This doubles as ensuring that the user owns the transaction, as the object will be null if the UserID and TransactionID combo don't exist.            
             if (transaction == null)
@@ -165,7 +173,7 @@ namespace AccountTrackerV2.Controllers
             }
 
             //Get transaction if it exists.
-            Transaction transaction = _transactionRepository.Get((int)id, userID, true);
+            Transaction transaction = _transactionRepository.Get((int)id, userID);
 
             //Confirm transaction exists. This doubles as ensuring that the user owns the transaction, as the object will be null if the UserID and TransactionID combo don't exist.
             if (transaction == null)
@@ -210,7 +218,7 @@ namespace AccountTrackerV2.Controllers
             foreach (var transaction in _transactionRepository.GetList(userID))
             {
                 //Get the detailed data for each transaction and add it to the IList of transactions
-                transactions.Add(_transactionRepository.Get(transaction.TransactionID, userID, true));
+                transactions.Add(_transactionRepository.Get(transaction.TransactionID, userID));
             }
 
             return transactions;

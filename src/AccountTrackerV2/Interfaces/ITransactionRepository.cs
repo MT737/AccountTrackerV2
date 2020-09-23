@@ -5,7 +5,7 @@ namespace AccountTrackerV2.Interfaces
 {
     public interface ITransactionRepository : IBaseRepository<Transaction>
     {
-        Transaction Get(int id, string userID, bool includeRelatedEntities = true);
+        Transaction Get(int id, string userID);
         int GetCount(string userID);
         IList<Transaction> GetList(string userID);
         bool UserOwnsTransaction(int id, string userID);

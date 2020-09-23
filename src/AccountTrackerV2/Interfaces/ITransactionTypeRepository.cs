@@ -5,7 +5,7 @@ namespace AccountTrackerV2.Interfaces
 {
     public interface ITransactionTypeRepository : IBaseRepository<TransactionType>
     {
-        int GetID(string name);
+        TransactionType GetTransactionType(string name);
         IList<TransactionType> GetList();
     }
 }

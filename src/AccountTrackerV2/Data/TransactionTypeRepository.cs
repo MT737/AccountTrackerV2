@@ -29,11 +29,11 @@ namespace AccountTrackerV2.Data
         /// </summary>
         /// <param name="name">String: Name of the transaction type.</param>
         /// <returns>Int: Transaciton Type ID associated to the passed name.</returns>
-        public int GetID(string name)
+        public TransactionType GetTransactionType(string name)
         {
             return Context.TransactionTypes
                 .Where(tt => tt.Name == name)
-                .SingleOrDefault().TransactionTypeID;
+                .SingleOrDefault();
         }
 
     }

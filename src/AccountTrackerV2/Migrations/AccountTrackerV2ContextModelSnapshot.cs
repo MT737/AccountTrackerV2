@@ -216,6 +216,18 @@ namespace AccountTrackerV2.Migrations
                     b.HasKey("TransactionTypeID");
 
                     b.ToTable("TransactionTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            TransactionTypeID = 1,
+                            Name = "Payment From"
+                        },
+                        new
+                        {
+                            TransactionTypeID = 2,
+                            Name = "Payment To"
+                        });
                 });
 
             modelBuilder.Entity("AccountTrackerV2.Models.Vendor", b =>
