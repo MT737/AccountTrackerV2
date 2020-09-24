@@ -1,18 +1,9 @@
-﻿using AccountTrackerV2.Areas.Identity.Data;
-using AccountTrackerV2.Data;
+﻿using AccountTrackerV2.Interfaces;
 using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using AccountTrackerV2.Interfaces;
 using System.Security.Claims;
 
 namespace AccountTrackerV2.Controllers
@@ -27,7 +18,7 @@ namespace AccountTrackerV2.Controllers
         private ITransactionRepository _transactionRepository = null;
         private ITransactionTypeRepository _transactionTypeRepository = null;
         private IVendorRepository _vendorRepository = null;
-        
+
         //Constructor [This is an excessive amount of work required just to make use of DI]
         public AccountController(IAccountRepository accountRepository, ICategoryRepository categoryRepository, ITransactionRepository transactionRepository,
             ITransactionTypeRepository transactionTypeRepository, IVendorRepository vendorRepository)
@@ -51,7 +42,7 @@ namespace AccountTrackerV2.Controllers
             if (vm.AccountsWithBalances.Count == 0)
             {
                 _vendorRepository.CreateDefaults(userID);
-                _categoryRepository.CreateDefaults(userID);                
+                _categoryRepository.CreateDefaults(userID);
             }
 
             return View(vm);
@@ -60,14 +51,14 @@ namespace AccountTrackerV2.Controllers
         public IActionResult Add()
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             //Instantiate an empty ViewModel
             AccountViewModel vm = new AccountViewModel();
-            
+
             //Instantiate empty AccountOfInterest and TransactionOfInterest properties in the VM
             vm.AccountOfInterest = new AccountViewModel.VMAccount();
             vm.AccountTransaction = new AccountViewModel.VMAccountTransaction();
-                        
+
             //Call the view and pass the VM.
             return View(vm);
         }
@@ -130,7 +121,7 @@ namespace AccountTrackerV2.Controllers
         {
             if (id == null)
             {
-                //TODO: confirm that this works the way I think it does
+                //TODO: Can I create a dynamic version to give the user a more detailed response.
                 return BadRequest();
             }
 
@@ -299,7 +290,7 @@ namespace AccountTrackerV2.Controllers
                     IsActive = account.IsActive,
                     Balance = _accountRepository.GetBalance(account.AccountID, userID, account.IsAsset)
                 };
-                
+
                 accountsWithBalances.Add(accountWithBalanceHolder);
             }
 

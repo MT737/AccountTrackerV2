@@ -9,7 +9,7 @@
 
 
 <form asp-controller="Vendor" asp-action="Edit" asp-antiforgery="true" method="post" role="form">
-    
+
     <!--TODO: Research better way to pass Vendor ID back to controller.-->
     @Html.HiddenFor(m => m.EntityOfInterest.EntityID)
 
@@ -31,3 +31,7 @@
 <div>
     @Html.ActionLink("Back to List", "Index")
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

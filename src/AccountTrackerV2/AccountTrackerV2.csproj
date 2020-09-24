@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <StartupObject>AccountTrackerV2.Program</StartupObject>
+    <UserSecretsId>216f4134-733c-4dac-9398-732cf77f288d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AccountTrackerV2.Data;
+﻿using AccountTrackerV2.Interfaces;
+using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using AccountTrackerV2.Models;
-using Microsoft.AspNetCore.Identity;
-using AccountTrackerV2.Areas.Identity.Data;
-using AccountTrackerV2.Interfaces;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Razor.Language.Intermediate;
 
 namespace AccountTrackerV2.Controllers
 {
     public class TransactionController : Controller
     {
-        //TODO: Need to account for instances where the user deletes their user account! Cascade delete works for all other tables but transactions!
+        //TODO: Need to account for instances where the user deletes their user account!
 
         private IAccountRepository _accountRepository = null;
         private ICategoryRepository _categoryRepository = null;

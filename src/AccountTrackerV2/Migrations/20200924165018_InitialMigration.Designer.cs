@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccountTrackerV2.Migrations
 {
     [DbContext(typeof(AccountTrackerV2Context))]
-    [Migration("20200922141307_Initial")]
-    partial class Initial
+    [Migration("20200924165018_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -437,7 +437,7 @@ namespace AccountTrackerV2.Migrations
                     b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AccountTrackerV2.Models.Vendor", "Vendor")

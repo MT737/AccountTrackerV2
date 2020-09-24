@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AccountTrackerV2.Areas.Identity.Data;
-using AccountTrackerV2.Data;
+﻿using AccountTrackerV2.Interfaces;
 using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using AccountTrackerV2.Interfaces;
+using System.Security.Claims;
 
 namespace AccountTrackerV2.Controllers
 {
@@ -60,8 +53,6 @@ namespace AccountTrackerV2.Controllers
                         
             if (vm.EntityOfInterest.Name != null)
             {
-                //TODO: Test trying to add a vendor by navigating directly to the post with input.
-
                 ValidateCategory(vm, userID);
 
                 if (ModelState.IsValid)
@@ -120,13 +111,11 @@ namespace AccountTrackerV2.Controllers
                 return View(vm);
             }
 
-            //TODO: Review if it makes more sense to use the ErrorViewModel for these...
             TempData["Message"] = "Adjustment of default categories is not allowed.";
 
             return RedirectToAction("Index");
         }
 
-        //TODO: Don't need VM for this, as only a category object is required. Consider simplifying this and the ViewModel.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(EntityViewModel vm)
@@ -270,11 +259,8 @@ namespace AccountTrackerV2.Controllers
             }
             SetErrorMessage(vm, "You must select a category to absorb transactions related to the category being deleted.", errorMessageSet);
 
-            EntityViewModel failureStateVM = new EntityViewModel();
-            
-            //TODO: It's possible that the client could adjust the category of interest category ID to a category not owned before posting, which would not be caught by now.
-            //TODO: Not a huge deal, as the absorption process will catch this, but it could allow users to see other's categories.
-            //TODO: Current approach of passing back the passed in CategoryVm category of interest should resolve this.
+            EntityViewModel failureStateVM = new EntityViewModel();         
+
             failureStateVM.EntityOfInterest = vm.EntityOfInterest;
             failureStateVM.CategorySelectList = failureStateVM.InitCategorySelectList(_categoryRepository, userID);
             return View(failureStateVM);

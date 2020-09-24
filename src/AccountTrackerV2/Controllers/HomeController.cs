@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AccountTrackerV2.Interfaces;
+using AccountTrackerV2.Models;
+using AccountTrackerV2.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using AccountTrackerV2.ViewModels;
-using AccountTrackerV2.Data;
-using AccountTrackerV2.Models;
-using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Claims;
-using AccountTrackerV2.Areas.Identity.Data;
-using AccountTrackerV2.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Principal;
 
 namespace AccountTrackerV2.Controllers
 {

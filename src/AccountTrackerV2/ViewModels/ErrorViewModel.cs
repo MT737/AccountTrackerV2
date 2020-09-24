@@ -1,5 +1,3 @@
-using System;
-
 namespace AccountTrackerV2.Models
 {
     public class ErrorViewModel

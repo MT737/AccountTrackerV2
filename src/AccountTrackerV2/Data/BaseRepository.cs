@@ -1,10 +1,5 @@
-﻿using AccountTrackerV2.Areas.Identity.Data;
+﻿using AccountTrackerV2.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AccountTrackerV2.Interfaces;
 
 namespace AccountTrackerV2.Data
 {

@@ -10,7 +10,9 @@
     <div class="col-md-6">
         <div class="form-group">
             <label asp-for="@Model.TransactionOfInterest.TransactionTypeID"></label>
-            <select asp-for="@Model.TransactionOfInterest.TransactionTypeID" class="form-control" asp-items="@Model.TransactionTypesSelectList"></select>
+            <select asp-for="@Model.TransactionOfInterest.TransactionTypeID" class="form-control" asp-items="@Model.TransactionTypesSelectList">
+                <option></option>
+            </select>
             <span asp-validation-for="@Model.TransactionOfInterest.TransactionTypeID" class="text-danger"></span>
         </div>
     </div>
@@ -19,14 +21,18 @@
     <div class="col-md-6">
         <div class="form-group">
             <label asp-for="@Model.TransactionOfInterest.AccountID"></label>
-            <select asp-for="@Model.TransactionOfInterest.AccountID" class="form-control" asp-items="@Model.AccountSelectList"></select>
+            <select asp-for="@Model.TransactionOfInterest.AccountID" class="form-control" asp-items="@Model.AccountSelectList">
+                <option></option>
+            </select>
             <span asp-validation-for="@Model.TransactionOfInterest.AccountID" class="text-danger"></span>
         </div>
     </div>
     <div class="col-md-6">
         <div class="form-group">
             <label asp-for="@Model.TransactionOfInterest.CategoryID"></label>
-            <select asp-for="@Model.TransactionOfInterest.CategoryID" class="form-control" asp-items="@Model.CategorySelectList"></select>
+            <select asp-for="@Model.TransactionOfInterest.CategoryID" class="form-control" asp-items="@Model.CategorySelectList">
+                <option></option>
+            </select>
             <span asp-validation-for="@Model.TransactionOfInterest.CategoryID" class="text-danger"></span>
         </div>
     </div>
@@ -35,7 +41,9 @@
     <div class="col-md-6">
         <div class="form-group">
             <label asp-for="@Model.TransactionOfInterest.VendorID"></label>
-            <select asp-for="@Model.TransactionOfInterest.VendorID" class="form-control" asp-items="@Model.VendorSelectList"></select>
+            <select asp-for="@Model.TransactionOfInterest.VendorID" class="form-control" asp-items="@Model.VendorSelectList">
+                <option></option>
+            </select>
             <span asp-validation-for="@Model.TransactionOfInterest.VendorID" class="text-danger"></span>
         </div>
     </div>
@@ -43,7 +51,8 @@
         <div class="form-group">
             <label asp-for="@Model.TransactionOfInterest.Amount"></label>
             <input asp-for="@Model.TransactionOfInterest.Amount" class="form-control"/>
-            <span asp-validation-for="@Model.TransactionOfInterest.Amount" class="text-danger"></span>
+            <span asp-validation-for="@Model.TransactionOfInterest.Amount" class="text-danger">
+            </span>
         </div>
     </div>
 </div>

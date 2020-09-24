@@ -1,6 +1,6 @@
 ﻿using AccountTrackerV2.Models;
-using System.Collections.Generic;
 using AccountTrackerV2.ViewModels;
+using System.Collections.Generic;
 
 namespace AccountTrackerV2.Interfaces
 {

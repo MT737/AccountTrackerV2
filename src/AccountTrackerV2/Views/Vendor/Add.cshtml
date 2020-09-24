@@ -7,7 +7,7 @@
 <h2>@ViewData["Title"]</h2>
 
 <form asp-controller="Vendor" asp-action="Add" asp-antiforgery="true" method="post" role="form">
-    
+
     <div asp-validation-summary="All" class="text-danger"></div>
 
     <partial name="_VendorForm.cshtml" />
@@ -22,3 +22,7 @@
         </div>
     </div>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

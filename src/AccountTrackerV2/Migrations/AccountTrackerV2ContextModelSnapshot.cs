@@ -435,7 +435,7 @@ namespace AccountTrackerV2.Migrations
                     b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AccountTrackerV2.Models.Vendor", "Vendor")

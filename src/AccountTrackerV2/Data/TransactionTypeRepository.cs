@@ -1,9 +1,7 @@
-﻿using AccountTrackerV2.Models;
-using System;
+﻿using AccountTrackerV2.Interfaces;
+using AccountTrackerV2.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using AccountTrackerV2.Interfaces;
 
 namespace AccountTrackerV2.Data
 {

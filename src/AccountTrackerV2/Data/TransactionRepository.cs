@@ -1,10 +1,8 @@
-﻿using AccountTrackerV2.Models;
-using System;
+﻿using AccountTrackerV2.Interfaces;
+using AccountTrackerV2.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using AccountTrackerV2.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace AccountTrackerV2.Data
 {

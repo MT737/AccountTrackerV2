@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AccountTrackerV2.Areas.Identity.Data;
+﻿using AccountTrackerV2.Areas.Identity.Data;
 using AccountTrackerV2.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -58,7 +53,7 @@ namespace AccountTrackerV2.Data
                 b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
                     .WithMany()
                     .HasForeignKey("UserID")
-                    .OnDelete(DeleteBehavior.Restrict)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
 
                 b.HasOne("AccountTrackerV2.Models.Vendor", "Vendor")
@@ -67,7 +62,33 @@ namespace AccountTrackerV2.Data
                     .OnDelete(DeleteBehavior.Restrict)
                     .IsRequired();
             });
+            
+            builder.Entity("AccountTrackerV2.Models.Vendor", b =>
+            {
+                b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
+                    .WithMany()
+                    .HasForeignKey("UserID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
+            builder.Entity("AccountTrackerV2.Models.Category", b =>
+            {
+                b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
+                    .WithMany()
+                    .HasForeignKey("UserID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
+
+            builder.Entity("AccountTrackerV2.Models.Account", b =>
+            {
+                b.HasOne("AccountTrackerV2.Areas.Identity.Data.AccountTrackerV2User", "User")
+                    .WithMany()
+                    .HasForeignKey("UserID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
         }
     }
 }

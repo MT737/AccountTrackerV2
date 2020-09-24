@@ -8,7 +8,7 @@
 <h2>@ViewData["Title"]</h2>
 
 <form asp-controller="Category" asp-action="Delete" asp-antiforgery="true" method="post" role="form">
-    
+
     <!--TODO: Research better way to pass ID back to controller.-->
     @Html.HiddenFor(m => m.EntityOfInterest.EntityID)
 
@@ -23,7 +23,9 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label asp-for="@Model.AbsorptionEntity.EntityID"></label>
-                <select asp-for="@Model.AbsorptionEntity.EntityID" class="form-control" asp-items="@Model.CategorySelectList"></select>              
+                <select asp-for="@Model.AbsorptionEntity.EntityID" class="form-control" asp-items="@Model.CategorySelectList">
+                    <option></option>
+                </select>
             </div>
         </div>
     </div>
@@ -38,3 +40,7 @@
         </div>
     </div>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
