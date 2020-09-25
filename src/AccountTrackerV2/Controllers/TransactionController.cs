@@ -2,9 +2,12 @@
 using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using X.PagedList;
 
 namespace AccountTrackerV2.Controllers
 {
@@ -28,20 +31,94 @@ namespace AccountTrackerV2.Controllers
             _vendorRepository = vendorRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string sortOrder, DateTime currentFilter, DateTime searchDate, int? page)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.DateSortParam = String.IsNullOrEmpty(sortOrder) ? "Date" : "";
+            ViewBag.AccountSortParam = sortOrder == "Account" ? "acct_desc" : "Account";
+            ViewBag.CategorySortParam = sortOrder == "Category" ? "cat_desc" : "Category";
+            ViewBag.VendorSortParam = sortOrder == "Vendor" ? "vend_desc" : "Vendor";
+            ViewBag.AmountSortParam = sortOrder == "Amount" ? "amt_desc" : "Amount";
 
             //TODO: tell user to create an account if none exist.
 
             //Instantiate viewmodel with list of transactions.
-            //TODO: Refactor for DI?
             TransactionViewModel vm = new TransactionViewModel
             {
                 Transactions = GetTransactionsWithDetails(userID)
             };
 
-            return View(vm);
+            //If user has searched for a new date, then start pagenation over
+            if ((searchDate != default))
+            {
+                page = 1;
+            }
+            //Otherwise set the searchDate value to the current filter to pass along and maintain the previously set filtering option.
+            else
+            {
+                searchDate = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchDate;
+
+            //If search date entered, filter on the search date.
+            if (!(searchDate == default))
+            {
+                vm.Transactions = vm.Transactions.Where(t => t.TransactionDate == searchDate).ToList();
+            }
+
+            //Sort as instructed
+            if (!(vm.Transactions.Count == 0))
+            {
+                switch (sortOrder)
+                {
+                    case "Account":
+                        vm.Transactions = vm.Transactions.OrderBy(t => t.Account.Name).ToList();
+                        break;
+
+                    case "acct_desc":
+                        vm.Transactions = vm.Transactions.OrderByDescending(t => t.Account.Name).ToList();
+                        break;
+
+                    case "Amount":
+                        vm.Transactions = vm.Transactions.OrderBy(t => t.Amount).ToList();
+                        break;
+
+                    case "amt_desc":
+                        vm.Transactions = vm.Transactions.OrderByDescending(t => t.Amount).ToList();
+                        break;
+
+                    case "Category":
+                        vm.Transactions = vm.Transactions.OrderBy(t => t.Category.Name).ToList();
+                        break;
+
+                    case "cat_desc":
+                        vm.Transactions = vm.Transactions.OrderByDescending(t => t.Category.Name).ToList();
+                        break;
+
+                    case "Date":
+                        vm.Transactions = vm.Transactions.OrderBy(t => t.TransactionDate).ToList();
+                        break;
+
+                    case "Vendor":
+                        vm.Transactions = vm.Transactions.OrderBy(t => t.Vendor.Name).ToList();
+                        break;
+
+                    case "vend_desc":
+                        vm.Transactions = vm.Transactions.OrderByDescending(t => t.Vendor.Name).ToList();
+                        break;
+
+                    default:
+                        vm.Transactions = vm.Transactions.OrderByDescending(t => t.TransactionDate).ToList();
+                        break;
+                }
+            }
+
+            int pageSize = 3;
+            int pageNumber = (page ?? 1);
+            ViewBag.SinglePageTransaction = vm.Transactions.ToPagedList(pageNumber, pageSize);
+            return View();
         }
 
         public IActionResult Add()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Diagnostics;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace AccountTrackerV2.ViewModels

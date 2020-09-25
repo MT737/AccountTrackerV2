@@ -2,9 +2,12 @@
 using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Operations;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Claims;
 
 namespace AccountTrackerV2.Controllers
@@ -35,19 +38,24 @@ namespace AccountTrackerV2.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string transSortOrder)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
+
             //TODO: add vm to DI?
             //Instantiate viewmodel
             HomeViewModel vm = new HomeViewModel
             {
+                //TODO: Probably need to limit how many entries show up in these tables.
                 Transactions = GetTransactionsWithDetails(userID),
                 AccountsWithBalances = GetAccountWithBalances(userID),
                 ByCategorySpending = GetCategorySpending(userID),
                 ByVendorSpending = GetVendorSpending(userID)
             };
+
+            //Limiting Home page transaction list to 10. Transaction Index will have the full list.
+            vm.Transactions = vm.Transactions.Take(10).ToList();
 
             return View(vm);
         }

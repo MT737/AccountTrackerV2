@@ -41,7 +41,7 @@ namespace AccountTrackerV2.Data
         {
             return Context.Transactions
                 .Where(t => t.UserID == userID)
-                .OrderByDescending(t => t.TransactionID)
+                .OrderByDescending(t => t.TransactionDate)
                 .ToList();
         }
 

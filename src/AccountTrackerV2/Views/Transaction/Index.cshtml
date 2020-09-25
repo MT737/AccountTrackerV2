@@ -1,4 +1,6 @@
-﻿@model AccountTrackerV2.ViewModels.TransactionViewModel
+﻿
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 @{
     ViewData["Title"] = "Transactions";
@@ -11,31 +13,49 @@
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
         <div class="panel panel-default">
             <div class="panel-body" style="overflow:auto">
-                <table class="table">
-                    <thead>
+                @using (Html.BeginForm("Index", "Transaction", FormMethod.Get))
+                {
+                    <p>
+                        Find by date: @Html.TextBox("Search Date", (DateTime)ViewBag.CurrentFilter, new { @type = "date" })
+                        <input type="submit" value="Search" />
+                    </p>
+                }
+                <table class="table table-sm">
+                    <caption>List of transactions</caption>
+                    <thead class="thead-light">
                         <tr>
-                            <th>Date</th>
-                            <th class="hidden-xs">Type</th>
-                            <th>Account</th>
-                            <th class="hidden-xs hidden-sm">Category</th>
-                            <th class="hidden-xs hidden-sm">Vendor</th>
-                            <th>Amount</th>
-                            <th class="hidden-xs hidden-sm">Description</th>
+                            <th>
+                                @Html.ActionLink("Date", "Index", new { sortOrder = ViewBag.DateSortParam, currentFilter = ViewBag.CurrentFilter })
+                            </th>
+                            <th>Type</th>
+                            <th>
+                                @Html.ActionLink("Account", "Index", new { sortOrder = ViewBag.AccountSortParam, currentFilter = ViewBag.CurrentFilter })
+                            </th>
+                            <th>
+                                @Html.ActionLink("Category", "Index", new { sortOrder = ViewBag.CategorySortParam, currentFilter = ViewBag.CurrentFilter })
+                            </th>
+                            <th>
+                                @Html.ActionLink("Vendor", "Index", new { sortOrder = ViewBag.VendorSortParam, currentFilter = ViewBag.CurrentFilter })
+                            </th>
+                            <th>
+                                @Html.ActionLink("Amount", "Index", new { sortOrder = ViewBag.AmountSortParam, currentFilter = ViewBag.CurrentFilter })
+                            </th>
+                            <th>Description</th>
                             <th>Edit</th>
                             <th>Delete</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var transaction in Model.Transactions)
+                        @foreach (var transaction in ViewBag.SinglePageTransaction)
                         {
                             <tr>
                                 <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
-                                <td class="hidden-xs">@transaction.TransactionType.Name</td>
+                                <td>@transaction.TransactionType.Name</td>
                                 <td>@transaction.Account.Name</td>
-                                <td class="hidden-xs hidden-sm">@transaction.Category.Name</td>
-                                <td class="hidden-xs hidden-sm">@transaction.Vendor.Name</td>
+                                <td>@transaction.Category.Name</td>
+                                <td>@transaction.Vendor.Name</td>
                                 <td style="text-align: right">$@transaction.Amount.ToString("#,##0.00")</td>
-                                <td class="hidden-xs hidden-sm">@transaction.Description</td>
+                                <td>@transaction.Description</td>
                                 <td>
                                     <a href="@Url.Action("Edit", "Transaction", new { id = transaction.TransactionID })" />
                                     <span class="fas fa-edit"></span>
@@ -48,6 +68,9 @@
                         }
                     </tbody>
                 </table>
+                <br />                
+                @Html.PagedListPager((IPagedList)ViewBag.SinglePageTransaction, page => Url.Action("Index",
+                    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
             </div>
         </div>
     </div>
