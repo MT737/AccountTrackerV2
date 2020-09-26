@@ -16,7 +16,7 @@
                 @using (Html.BeginForm("Index", "Transaction", FormMethod.Get))
                 {
                     <p>
-                        Find by date: @Html.TextBox("Search Date", (DateTime)ViewBag.CurrentFilter, new { @type = "date" })
+                        Find by date: @Html.TextBox("searchDate", (DateTime)ViewBag.CurrentFilter, new { @type = "date" })
                         <input type="submit" value="Search" />
                     </p>
                 }
@@ -70,7 +70,12 @@
                 </table>
                 <br />                
                 @Html.PagedListPager((IPagedList)ViewBag.SinglePageTransaction, page => Url.Action("Index",
-                    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+                    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
+                    {
+                        UlElementClasses = new string[] { "pagination" },
+                        LiElementClasses = new string[] { "page-item" },
+                        PageClasses = new string[] { "page-link" },
+                    })
             </div>
         </div>
     </div>

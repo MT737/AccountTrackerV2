@@ -115,7 +115,7 @@ namespace AccountTrackerV2.Controllers
                 }
             }
 
-            int pageSize = 3;
+            int pageSize = 10;
             int pageNumber = (page ?? 1);
             ViewBag.SinglePageTransaction = vm.Transactions.ToPagedList(pageNumber, pageSize);
             return View();
