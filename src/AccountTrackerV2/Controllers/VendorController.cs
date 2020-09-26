@@ -47,8 +47,7 @@ namespace AccountTrackerV2.Controllers
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
                         
             if (vm.EntityOfInterest.Name != null)
-            {
-                //TODO: Test trying to add a vendor by navigating directly to the post without input.            
+            { 
                 
                 ValidateVendor(vm, userID);
 
@@ -253,9 +252,6 @@ namespace AccountTrackerV2.Controllers
 
             EntityViewModel failureStateVM = new EntityViewModel();
 
-            //TODO: It's possible that the client could adjust the vendor of interest vendor ID to a vendor not owned before posting, which would not be caught by now.
-            //TODO: Not a huge deal, as the absorption process will catch this, but it could allow users to see unowned vendors.
-            //TODO: Current approach of passing back the passed in VendorVM vendor of interest should resolve this.
             failureStateVM.EntityOfInterest = vm.EntityOfInterest;
             failureStateVM.VendorSelectList = failureStateVM.InitVendorSelectList(_vendorRepository, userID);
             return View(failureStateVM);

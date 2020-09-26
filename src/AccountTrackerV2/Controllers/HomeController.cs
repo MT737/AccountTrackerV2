@@ -31,7 +31,7 @@ namespace AccountTrackerV2.Controllers
             _vendorRepository = vendorRepository;
         }
 
-        //TODO: review documentation regarding this.
+        //TODO: review documentation regarding ResponseCache.
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -47,7 +47,7 @@ namespace AccountTrackerV2.Controllers
             //Instantiate viewmodel
             HomeViewModel vm = new HomeViewModel
             {
-                //TODO: Probably need to limit how many entries show up in these tables.
+                //TODO: Consider limiting how many entries show up in these tables.
                 Transactions = GetTransactionsWithDetails(userID),
                 AccountsWithBalances = GetAccountWithBalances(userID),
                 ByCategorySpending = GetCategorySpending(userID),
@@ -55,7 +55,7 @@ namespace AccountTrackerV2.Controllers
             };
 
             //Limiting Home page transaction list to 10. Transaction Index will have the full list.
-            vm.Transactions = vm.Transactions.Take(10).ToList();
+            vm.Transactions = vm.Transactions.OrderByDescending(t => t.TransactionDate).Take(10).ToList();
 
             return View(vm);
         }

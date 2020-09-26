@@ -82,17 +82,13 @@ namespace AccountTrackerV2.Data
             //TODO: I really want to simplify this to a single query (there's already enough communications with the DB happening as is).
             decimal balance;
 
-            //TODO: EFCore .include is giving me issues all of a sudden. Commenting out based on the statement below, but return to this if balances don't work.
-            //According to docs.microsoft: "Entity Framework Core will automatically fix-up navigation properties to any other entities that were previously loaded into the context instance."
-            //"So even if you don't explicitly include the data for a navigation property, the property may still be populated if some or all of the related entities were previously loaded."
+            //TODO: Further test account balances
             var paymentTo = Context.Transactions
-                 //.Include(tt => tt.TransactionType)
                  .Where(t => t.AccountID == accountId && t.UserID == userID && t.TransactionType.Name == "Payment To")
                  .ToList()
                  .Sum(t => t.Amount);
 
             var paymentFrom = Context.Transactions
-                //.Include(tt => tt.TransactionType)
                 .Where(t => t.AccountID == accountId && t.UserID == userID && t.TransactionType.Name == "Payment From")
                 .ToList()
                 .Sum(t => t.Amount);

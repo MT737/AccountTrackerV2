@@ -25,7 +25,6 @@ namespace AccountTrackerV2.Data
             Context.SaveChanges();
         }
 
-        //TODO: According to my reading, EF core, unlike prior EF, doesn't need 
         /// <summary>
         /// Set entity's state to modified and save the changes to the database.
         /// </summary>

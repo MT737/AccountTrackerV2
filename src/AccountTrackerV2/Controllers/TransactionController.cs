@@ -12,9 +12,7 @@ using X.PagedList;
 namespace AccountTrackerV2.Controllers
 {
     public class TransactionController : Controller
-    {
-        //TODO: Need to account for instances where the user deletes their user account!
-
+    {        
         private IAccountRepository _accountRepository = null;
         private ICategoryRepository _categoryRepository = null;
         private ITransactionRepository _transactionRepository = null;
