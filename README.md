@@ -6,17 +6,17 @@
 This is a simple ASP.Net Core web application making use of Entity Framework and Entity Framework Identity. I'm building and updating the application as a personal exercise. As such, it should not be utilized by anyone for the storage of sensitive and required data. Data will not be persisted into perpetuity. 
 
 ### Immediate Tasks
-1. Add sorting to Accounts, Categories, and Vendors indexes.
-2. Add filtering to Accounts, Categories, and Vendors indexes.
-3. Add pagination to Accounts, Categories, and Vendors indexes.
-4. Correct issue in which entity editing validation failure messages are presented in green success textboxes.
+1. ~~Add sorting to Accounts, Categories, and Vendors indexes.
+2. ~~Add filtering to Accounts, Categories, and Vendors indexes.
+3. ~~Add pagination to Accounts, Categories, and Vendors indexes.
+4. ~~Correct issue in which entity editing validation failure messages are presented in green success textboxes.
 5. Update old HTML BootStrap formating (panels are now cards)
 6. Further test account balances for accuracy after multiple transactions
 
 ### Roadmap
 1. Implement email varification and password recovery
 2. Consider implementation of external log-in methods
-3. Further refactoring (such as possibly Direct Injecting view models, comparing ViewData to ViewBag, and Pushing DRY)
+3. Further refactoring (such as possibly Direct Injecting view models, comparing ViewData to ViewBag, Pushing DRY). Finally, review the possiblity of migrating all sorting, filtering, and pagination ViewBag items to related ViewModels.
 4. Inform user to create an account if none are present. (Basically, provide the user with more friendly direction)
 5. Determine if limiting category select list items that appear when creating a new transaction is necessary.
 6. Determine if addtional validation measures are required as part of the transaction add and an edit post actions. 
