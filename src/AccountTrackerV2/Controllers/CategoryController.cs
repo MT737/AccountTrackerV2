@@ -149,7 +149,7 @@ namespace AccountTrackerV2.Controllers
                 return View(vm);
             }
 
-            TempData["Message"] = "Adjustment of default categories is not allowed.";
+            TempData["BadMessage"] = "Adjustment of default categories is not allowed.";
 
             return RedirectToAction("Index");
         }
@@ -198,7 +198,7 @@ namespace AccountTrackerV2.Controllers
                     }
                 }
                 
-                TempData["Message"] = "Adjustment of default categories is not allowed.";
+                TempData["BadMessage"] = "Adjustment of default categories is not allowed.";
 
                 return RedirectToAction("Index");
             }
@@ -246,7 +246,7 @@ namespace AccountTrackerV2.Controllers
                 return View(vm);
             }
 
-            TempData["Message"] = "Deleting default categories is not allowed.";
+            TempData["BadMessage"] = "Deleting default categories is not allowed.";
 
             return RedirectToAction("Index");
         }

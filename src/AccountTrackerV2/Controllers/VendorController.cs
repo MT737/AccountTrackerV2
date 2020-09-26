@@ -146,7 +146,7 @@ namespace AccountTrackerV2.Controllers
                 return View(vm);
             }
 
-            TempData["Message"] = "Adjustment of default vendor is not allow.";
+            TempData["BadMessage"] = "Adjustment of default vendor is not allow.";
 
             return RedirectToAction("Index");
         }
@@ -238,7 +238,7 @@ namespace AccountTrackerV2.Controllers
                 return View(vm);
             }
 
-            TempData["Message"] = "Deleting default vendor is not allowed.";
+            TempData["BadMessage"] = "Deleting default vendor is not allowed.";
 
             return RedirectToAction("Index");
         }
