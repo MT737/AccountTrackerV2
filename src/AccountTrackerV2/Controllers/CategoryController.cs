@@ -2,7 +2,10 @@
 using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
 using System.Security.Claims;
+using X.PagedList;
 
 namespace AccountTrackerV2.Controllers
 {
@@ -18,9 +21,11 @@ namespace AccountTrackerV2.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string sortOrder, string currentFilter, string searchName, int? page)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.SortOrder = sortOrder;
+            ViewBag.NameSortParam = String.IsNullOrEmpty(sortOrder) ? "Category" : "";
 
             //TODO: Add VMs to services DI?
             EntityViewModel vm = new EntityViewModel();
@@ -33,7 +38,40 @@ namespace AccountTrackerV2.Controllers
                 vm.Categories = _categoryRepository.GetList(userID);
             }
 
-            return View(vm);
+            //If user searched for a new name, then start pagenation over
+            if (searchName != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchName = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchName;
+
+            //If search name entered, filter on search name.
+            if (searchName != null)
+            {
+                vm.Categories = vm.Categories.Where(c => c.Name == searchName).ToList();
+            }
+
+            //Sort as instructed
+            switch (sortOrder)
+            {
+                case "Category":
+                    vm.Categories = vm.Categories.OrderByDescending(c => c.Name).ToList();
+                    break;
+
+                default:
+                    vm.Categories = vm.Categories.OrderBy(c => c.Name).ToList();
+                    break;
+            }
+
+            int pageSize = 10;
+            int pageNumber = (page ?? 1);
+            ViewBag.SinglePageCategory = vm.Categories.ToPagedList(pageNumber, pageSize);
+            return View();
         }
 
         public IActionResult Add()

@@ -2,7 +2,10 @@
 using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
 using System.Security.Claims;
+using X.PagedList;
 
 namespace AccountTrackerV2.Controllers
 {
@@ -15,9 +18,12 @@ namespace AccountTrackerV2.Controllers
             _vendorRepository = vendorRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string sortOrder, string currentFilter, string searchName, int? page)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.SortOrder = sortOrder;
+            ViewBag.NameSortParam = String.IsNullOrEmpty(sortOrder) ? "Vendor" : "";
+
 
             //TODO: Add the VMs to services for DI?
             EntityViewModel vm = new EntityViewModel();
@@ -30,7 +36,40 @@ namespace AccountTrackerV2.Controllers
                 vm.Vendors = _vendorRepository.GetList(userID);
             }
 
-            return View(vm);
+            //If user searched for a new name, then start pagenation over.
+            if (searchName != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchName = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchName;
+
+            //If searchName entered, filter on searchName.
+            if (searchName != null)
+            {
+                vm.Vendors = vm.Vendors.Where(v => v.Name == searchName).ToList();
+            }
+
+            //Sort as instructed
+            switch (sortOrder)
+            {
+                case "Vendor":
+                    vm.Vendors = vm.Vendors.OrderByDescending(v => v.Name).ToList();
+                    break;
+
+                default:
+                    vm.Vendors = vm.Vendors.OrderBy(v => v.Name).ToList();
+                    break;
+            }
+
+            int pageSize = 10;
+            int pageNumber = (page ?? 1);
+            ViewBag.SinglePageVendor = vm.Vendors.ToPagedList(pageNumber, pageSize);
+            return View();
         }
 
         public IActionResult Add()

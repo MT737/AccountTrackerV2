@@ -1,4 +1,5 @@
-﻿@model AccountTrackerV2.ViewModels.EntityViewModel
+﻿@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 @{
     ViewData["Title"] = "Vendors";
@@ -10,12 +11,21 @@
     <div class="col-md-6">
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
         <div class="panel panel-default">
+            @using (Html.BeginForm("Index", "Vendor", FormMethod.Get))
+            {
+                <p>
+                    Search by Name: @Html.TextBox("searchName", ViewBag.CurrentFilter as string)
+                    <input type="submit" value="Search" />
+                </p>
+            }
             <div class="panel-body" style="overflow:auto">
                 <table class="table table-sm">
                     <caption>List of vendors</caption>
                     <thead class="thead-light">
                         <tr>
-                            <th>Vendor</th>
+                            <th>
+                                @Html.ActionLink("Vendor", "Index", new { sortOrder = ViewBag.NameSortParam, currentFilter = ViewBag.CurrentFilter })
+                            </th>
                             <th>Default</th>
                             <th>Displayed</th>
                             <th>Edit</th>
@@ -23,7 +33,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var vendor in Model.Vendors)
+                        @foreach (var vendor in ViewBag.SinglePageVendor)
                         {
                         <tr>
                             <td>@vendor.Name</td>
@@ -55,6 +65,13 @@
                         }
                     </tbody>
                 </table>
+                @Html.PagedListPager((IPagedList)ViewBag.SinglePageVendor, page => Url.Action("Index",
+               new { page, sortOrder = ViewBag.SortOrder, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
+               {
+                   UlElementClasses = new string[] { "pagination" },
+                   LiElementClasses = new string[] { "page-item" },
+                   PageClasses = new string[] { "page-link" },
+               })
             </div>
         </div>
     </div>
