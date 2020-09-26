@@ -2,15 +2,27 @@
 [Live site](https://accounttrackerv220200924184215.azurewebsites.net/Identity/Account/Login?ReturnUrl=%2F) hosted by Microsoft Azure.
 
 
-## Overview
+### Overview
 This is a simple ASP.Net Core web application making use of Entity Framework and Entity Framework Identity. I'm building and updating the application as a personal exercise. As such, it should not be utilized by anyone for the storage of sensitive and required data. Data will not be persisted into perpetuity. 
 
-## Immediate Tasks
+### Immediate Tasks
 1. Add sorting to Accounts, Categories, and Vendors indexes.
 2. Add filtering to Accounts, Categories, and Vendors indexes.
 3. Add pagination to Accounts, Categories, and Vendors indexes.
 4. Correct issue in which entity editing validation failure messages are presented in green success textboxes.
 5. Update old HTML BootStrap formating (panels are now cards)
+6. Further test account balances for accuracy after multiple transactions
 
-## Roadmap
-1. Further refactoring (such as possibly Direct Injecting view models)
+### Roadmap
+1. Implement email varification and password recovery
+2. Consider implementation of external log-in methods
+3. Further refactoring (such as possibly Direct Injecting view models, comparing ViewData to ViewBag, and Pushing DRY)
+4. Inform user to create an account if none are present. (Basically, provide the user with more friendly direction)
+5. Determine if limiting category select list items that appear when creating a new transaction is necessary.
+6. Determine if addtional validation measures are required as part of the transaction add and an edit post actions. 
+7. Research improved method for calculating account balance.
+8. Implement bulk DB update for Absorption method (both category and vendor). 
+9. Look for a better way to set decimal scale for a property
+10. Create dynamic BadRequest and NotFound pages/messages to provide further feedback to the user.
+11. Remaining TODO: task list items
+12. Additional Theme/Layout changes
