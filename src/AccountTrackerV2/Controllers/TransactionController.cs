@@ -48,7 +48,7 @@ namespace AccountTrackerV2.Controllers
             };
 
             //If user has searched for a new date, then start pagenation over
-            if ((searchDate != default))
+            if (searchDate != default)
             {
                 page = 1;
             }
@@ -61,7 +61,7 @@ namespace AccountTrackerV2.Controllers
             ViewBag.CurrentFilter = searchDate;
 
             //If search date entered, filter on the search date.
-            if (!(searchDate == default))
+            if (searchDate != default)
             {
                 vm.Transactions = vm.Transactions.Where(t => t.TransactionDate == searchDate).ToList();
             }

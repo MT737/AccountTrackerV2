@@ -2,9 +2,12 @@
 using AccountTrackerV2.Models;
 using AccountTrackerV2.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using X.PagedList;
 
 namespace AccountTrackerV2.Controllers
 {
@@ -30,9 +33,12 @@ namespace AccountTrackerV2.Controllers
             _vendorRepository = vendorRepository;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string sortOrder, string currentFilter, string searchName, int? page)
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParam = String.IsNullOrEmpty(sortOrder) ? "Name" : "";
+            ViewBag.BalanceSortParam = sortOrder == "Balance" ? "balance_desc" : "Balance";
 
             AccountViewModel vm = new AccountViewModel();
             vm.AccountsWithBalances = GetAccountsWithBalances(userID);
@@ -45,7 +51,51 @@ namespace AccountTrackerV2.Controllers
                 _categoryRepository.CreateDefaults(userID);
             }
 
-            return View(vm);
+            //If user searched for a new name, then start pagenation over
+            if (searchName != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchName = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchName;
+
+            //If search name entered, filter on search name.
+            if (searchName != null)
+            {
+                vm.AccountsWithBalances = vm.AccountsWithBalances.Where(a => a.Name == searchName).ToList();
+            }
+
+            //Sort as instructed
+            if (!(vm.AccountsWithBalances.Count == 0))
+            {
+                switch (sortOrder)
+                {
+                    case "Name":
+                        vm.AccountsWithBalances = vm.AccountsWithBalances.OrderByDescending(a => a.Name).ToList();
+                        break;
+
+                    case "Balance":
+                        vm.AccountsWithBalances = vm.AccountsWithBalances.OrderBy(a => a.Balance).ToList();
+                        break;
+
+                    case "balance_desc":
+                        vm.AccountsWithBalances = vm.AccountsWithBalances.OrderByDescending(a => a.Balance).ToList();
+                        break;
+
+                    default:
+                        vm.AccountsWithBalances = vm.AccountsWithBalances.OrderBy(a => a.Name).ToList();
+                        break;
+                }
+            }
+
+            int pageSize = 10;
+            int pageNumber = (page ?? 1);
+            ViewBag.SinglePageAccount = vm.AccountsWithBalances.ToPagedList(pageNumber, pageSize);
+            return View();
         }
 
         public IActionResult Add()
