@@ -26,3 +26,4 @@ This is a simple ASP.Net Core web application making use of Entity Framework and
 10. Create dynamic BadRequest and NotFound pages/messages to provide further feedback to the user.
 11. Remaining TODO: task list items
 12. Additional Theme/Layout changes
+13. Implement BootStrap custom validation features.
