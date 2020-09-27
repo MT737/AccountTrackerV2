@@ -3,7 +3,7 @@
 
 
 ### Overview
-This is a simple ASP.Net Core web application making use of Entity Framework and Entity Framework Identity. I'm building and updating the application as a personal exercise. As such, it should not be utilized by anyone for the storage of sensitive and required data. Data will not be persisted into perpetuity. 
+This is a simple ASP.Net Core web application making use of Entity Framework and Entity Framework Identity. I'm building and updating the application as a personal exercise. As such, it should not be utilized by anyone for the storage of sensitive and required data. WARNING! Data will not be persisted into perpetuity and the site is not SSL/TSL protected. 
 
 ### Immediate Tasks
 1. ~~Add sorting to Accounts, Categories, and Vendors indexes.~~ 9/26/2020
