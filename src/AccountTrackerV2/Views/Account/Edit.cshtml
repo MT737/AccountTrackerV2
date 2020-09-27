@@ -9,19 +9,16 @@
 
 <form asp-controller="Account" asp-action="Edit" asp-antiforgery="true" method="post" role="form">
 
-    <!--TODO: Research better way to pass account ID back to controller.-->
     @Html.HiddenFor(m => m.AccountOfInterest.AccountID)
 
     <partial name="_AccountForm.cshtml" />
 
-    <div class="form-horizontal">
-        <hr />
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Update" class="btn btn-success" />
-            </div>
+    <hr />
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Update" class="btn btn-success" />
         </div>
-    </div>
+    </div>    
 </form>
 
 <div>

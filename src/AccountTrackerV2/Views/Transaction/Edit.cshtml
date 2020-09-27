@@ -9,7 +9,6 @@
 
 <form asp-controller="Transaction" asp-action="Edit" asp-antiforgery="true" method="post" role="form">
 
-    <!--TODO: Research better way to pass transaction ID back to controller.-->
     @Html.HiddenFor(m => m.TransactionOfInterest.TransactionID)
 
     <div asp-validation-summary="All" class="text-danger"></div>

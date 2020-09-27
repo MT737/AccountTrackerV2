@@ -12,16 +12,17 @@
 
     <partial name="_VendorForm.cshtml" />
 
-    <div class="row">
-        <div class="form-horizontal">
-            <div class="form-group">
-                <div class="col-md-2 col-md-10">
-                    <input type="submit" value="Create" class="btn btn-success" />
-                </div>
-            </div>
+    <hr />
+    <div class="form-group">
+        <div class="col-md-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-success" />
         </div>
-    </div>
+    </div>    
 </form>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -10,22 +10,18 @@
 
 <form asp-controller="Vendor" asp-action="Edit" asp-antiforgery="true" method="post" role="form">
 
-    <!--TODO: Research better way to pass Vendor ID back to controller.-->
     @Html.HiddenFor(m => m.EntityOfInterest.EntityID)
 
     <div asp-validation-summary="All" class="text-danger"></div>
 
     <partial name="_VendorForm.cshtml" />
 
-    <div class="row">
-        <div class="form-horizontal">
-            <div class="form-Group">
-                <div class="col-md-2 col-md-10">
-                    <input type="submit" value="Update" class="btn btn-success" />
-                </div>
-            </div>
+    <hr/>
+    <div class="form-Group">
+        <div class="col-md-2 col-md-10">
+            <input type="submit" value="Update" class="btn btn-success" />
         </div>
-    </div>
+    </div>    
 </form>
 
 <div>

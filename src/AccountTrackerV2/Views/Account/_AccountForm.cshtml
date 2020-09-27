@@ -11,15 +11,15 @@
 </div>
 <div class="row">
     <div class="col-md-2">
-        <div class="form-group">
+        <div class="form-check">
+            <input asp-for="@Model.AccountOfInterest.IsAsset" class="form-check-input" type="checkbox" />
             <label asp-for="@Model.AccountOfInterest.IsAsset"></label>
-            <input asp-for="@Model.AccountOfInterest.IsAsset" class="form-control" type="checkbox" />
         </div>
     </div>
     <div class="col-md-2">
-        <div class="form-group">
+        <div class="form-check">
+            <input asp-for="@Model.AccountOfInterest.IsActive" class="form-check-input" type="checkbox" />
             <label asp-for="@Model.AccountOfInterest.IsActive"></label>
-            <input asp-for="@Model.AccountOfInterest.IsActive" class="form-control" type="checkbox" />
         </div>
     </div>
 </div>

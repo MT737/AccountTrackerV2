@@ -9,7 +9,6 @@
 
 <form asp-controller="Category" asp-action="Delete" asp-antiforgery="true" method="post" role="form">
 
-    <!--TODO: Research better way to pass ID back to controller.-->
     @Html.HiddenFor(m => m.EntityOfInterest.EntityID)
 
     <div class="row">
