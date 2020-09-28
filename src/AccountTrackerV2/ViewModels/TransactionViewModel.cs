@@ -46,6 +46,7 @@ namespace AccountTrackerV2.ViewModels
             [Range(-9999999999999999.99, 9999999999999999.99)]
             public decimal Amount { get; set; }
 
+            [StringLength(200)]
             public string Description { get; set; }
         }
     }

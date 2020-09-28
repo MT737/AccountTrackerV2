@@ -39,7 +39,7 @@
                     <th>
                         @Html.ActionLink("Amount", "Index", new { sortOrder = ViewBag.AmountSortParam, currentFilter = ViewBag.CurrentFilter })
                     </th>
-                    <th>Description</th>
+                    <th class="d-none d-lg-table-cell">Description</th>
                     <th>Edit</th>
                     <th>Delete</th>
                 </tr>
@@ -54,7 +54,7 @@
                         <td>@transaction.Category.Name</td>
                         <td>@transaction.Vendor.Name</td>
                         <td style="text-align: right">$@transaction.Amount.ToString("#,##0.00")</td>
-                        <td>@transaction.Description</td>
+                        <td class="d-none d-lg-table-cell">@transaction.Description</td>
                         <td>
                             <a href="@Url.Action("Edit", "Transaction", new { id = transaction.TransactionID })" />
                             <span class="fas fa-edit"></span>
