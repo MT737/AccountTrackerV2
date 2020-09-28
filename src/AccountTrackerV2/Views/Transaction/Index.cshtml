@@ -11,72 +11,70 @@
 <div class="row">
     <div class="col-md-12">
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
-        <div class="panel panel-default">
-            <div class="panel-body" style="overflow:auto">
-                @using (Html.BeginForm("Index", "Transaction", FormMethod.Get))
+        @using (Html.BeginForm("Index", "Transaction", FormMethod.Get))
+        {
+            <p>
+                Find by date: @Html.TextBox("searchDate", (DateTime)ViewBag.CurrentFilter, new { @type = "date" })
+                <input type="submit" value="Search" />
+            </p>
+        }
+    <div style="overflow:auto">
+        <table class="table table-sm">
+            <caption>List of transactions</caption>
+            <thead class="thead-light">
+                <tr>
+                    <th>
+                        @Html.ActionLink("Date", "Index", new { sortOrder = ViewBag.DateSortParam, currentFilter = ViewBag.CurrentFilter })
+                    </th>
+                    <th>Type</th>
+                    <th>
+                        @Html.ActionLink("Account", "Index", new { sortOrder = ViewBag.AccountSortParam, currentFilter = ViewBag.CurrentFilter })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Category", "Index", new { sortOrder = ViewBag.CategorySortParam, currentFilter = ViewBag.CurrentFilter })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Vendor", "Index", new { sortOrder = ViewBag.VendorSortParam, currentFilter = ViewBag.CurrentFilter })
+                    </th>
+                    <th>
+                        @Html.ActionLink("Amount", "Index", new { sortOrder = ViewBag.AmountSortParam, currentFilter = ViewBag.CurrentFilter })
+                    </th>
+                    <th>Description</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in ViewBag.SinglePageTransaction)
                 {
-                    <p>
-                        Find by date: @Html.TextBox("searchDate", (DateTime)ViewBag.CurrentFilter, new { @type = "date" })
-                        <input type="submit" value="Search" />
-                    </p>
+                    <tr>
+                        <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
+                        <td>@transaction.TransactionType.Name</td>
+                        <td>@transaction.Account.Name</td>
+                        <td>@transaction.Category.Name</td>
+                        <td>@transaction.Vendor.Name</td>
+                        <td style="text-align: right">$@transaction.Amount.ToString("#,##0.00")</td>
+                        <td>@transaction.Description</td>
+                        <td>
+                            <a href="@Url.Action("Edit", "Transaction", new { id = transaction.TransactionID })" />
+                            <span class="fas fa-edit"></span>
+                        </td>
+                        <td>
+                            <a href="@Url.Action("Delete", "Transaction", new { id = transaction.TransactionID })" />
+                            <span class="fas fa-trash-alt"></span>
+                        </td>
+                    </tr>
                 }
-                <table class="table table-sm">
-                    <caption>List of transactions</caption>
-                    <thead class="thead-light">
-                        <tr>
-                            <th>
-                                @Html.ActionLink("Date", "Index", new { sortOrder = ViewBag.DateSortParam, currentFilter = ViewBag.CurrentFilter })
-                            </th>
-                            <th>Type</th>
-                            <th>
-                                @Html.ActionLink("Account", "Index", new { sortOrder = ViewBag.AccountSortParam, currentFilter = ViewBag.CurrentFilter })
-                            </th>
-                            <th>
-                                @Html.ActionLink("Category", "Index", new { sortOrder = ViewBag.CategorySortParam, currentFilter = ViewBag.CurrentFilter })
-                            </th>
-                            <th>
-                                @Html.ActionLink("Vendor", "Index", new { sortOrder = ViewBag.VendorSortParam, currentFilter = ViewBag.CurrentFilter })
-                            </th>
-                            <th>
-                                @Html.ActionLink("Amount", "Index", new { sortOrder = ViewBag.AmountSortParam, currentFilter = ViewBag.CurrentFilter })
-                            </th>
-                            <th>Description</th>
-                            <th>Edit</th>
-                            <th>Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var transaction in ViewBag.SinglePageTransaction)
-                        {
-                            <tr>
-                                <td>@transaction.TransactionDate.ToString("MM/dd/yyyy")</td>
-                                <td>@transaction.TransactionType.Name</td>
-                                <td>@transaction.Account.Name</td>
-                                <td>@transaction.Category.Name</td>
-                                <td>@transaction.Vendor.Name</td>
-                                <td style="text-align: right">$@transaction.Amount.ToString("#,##0.00")</td>
-                                <td>@transaction.Description</td>
-                                <td>
-                                    <a href="@Url.Action("Edit", "Transaction", new { id = transaction.TransactionID })" />
-                                    <span class="fas fa-edit"></span>
-                                </td>
-                                <td>
-                                    <a href="@Url.Action("Delete", "Transaction", new { id = transaction.TransactionID })" />
-                                    <span class="fas fa-trash-alt"></span>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <br />                
-                @Html.PagedListPager((IPagedList)ViewBag.SinglePageTransaction, page => Url.Action("Index",
-                    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
-                    {
-                        UlElementClasses = new string[] { "pagination" },
-                        LiElementClasses = new string[] { "page-item" },
-                        PageClasses = new string[] { "page-link" },
-                    })
-            </div>
-        </div>
+            </tbody>
+        </table>
+    </div styel="overflow:auto">
+        <br />                
+        @Html.PagedListPager((IPagedList)ViewBag.SinglePageTransaction, page => Url.Action("Index",
+            new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
+            {
+                UlElementClasses = new string[] { "pagination" },
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" },
+            })
     </div>
 </div>

@@ -10,67 +10,63 @@
 <div class="row">
     <div class="col-md-6">
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
-        <div class="panel panel-default">
-            @using (Html.BeginForm("Index", "Category", FormMethod.Get))
-            {
-                <p>
-                    Find by Name: @Html.TextBox("searchName", ViewBag.CurrentFilter as string)
-                    <input type="submit" value="Search"/>
-                </p>
-            }
-            <div class="panel-body" style="overflow:auto">
-                <table class="table table-sm">
-                    <caption>Index of accounts</caption>
-                    <thead class="thead-light">
-                        <tr>
-                            <th>
-                                @Html.ActionLink("Category", "Index", new { sortOrder = ViewBag.NameSortParam, currentFilter = ViewBag.CurrentFilter })
-                            </th>
-                            <th>Default</th>
-                            <th>Displayed</th>
-                            <th>Edit</th>
-                            <th>Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var category in ViewBag.SinglePageCategory)
+        @using (Html.BeginForm("Index", "Category", FormMethod.Get))
+        {
+            <p>
+                Find by Name: @Html.TextBox("searchName", ViewBag.CurrentFilter as string)
+                <input type="submit" value="Search"/>
+            </p>
+        }        
+        <table class="table table-sm">
+            <caption>Index of accounts</caption>
+            <thead class="thead-light">
+                <tr>
+                    <th>
+                        @Html.ActionLink("Category", "Index", new { sortOrder = ViewBag.NameSortParam, currentFilter = ViewBag.CurrentFilter })
+                    </th>
+                    <th>Default</th>
+                    <th>Displayed</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in ViewBag.SinglePageCategory)
+                {
+                    <tr>
+                        <td>@category.Name</td>
+                        <td>@category.IsDefault</td>
+                        <td>@category.IsDisplayed</td>
+                        @if (!category.IsDefault)
                         {
-                            <tr>
-                                <td>@category.Name</td>
-                                <td>@category.IsDefault</td>
-                                <td>@category.IsDisplayed</td>
-                                @if (!category.IsDefault)
-                                {
-                                    <td>
-                                        <a href="@Url.Action("Edit", "Category", new {id = category.CategoryID})" />
-                                        <span class="fas fa-edit"></span>
-                                    </td>
-                                    <td>
-                                        <a href="@Url.Action("Delete", "Category", new {id = category.CategoryID})" />
-                                        <span class="fas fa-trash-alt"></span>
-                                    </td>
-                                }
-                                else
-                                {
-                                    <td>
-                                        <span class="fas fa-ban"></span>
-                                    </td>
-                                    <td>
-                                        <span class="fas fa-ban"></span>
-                                    </td>
-                                }
-                            </tr>
+                            <td>
+                                <a href="@Url.Action("Edit", "Category", new {id = category.CategoryID})" />
+                                <span class="fas fa-edit"></span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Delete", "Category", new {id = category.CategoryID})" />
+                                <span class="fas fa-trash-alt"></span>
+                            </td>
                         }
-                    </tbody>
-                </table>
-                @Html.PagedListPager((IPagedList)ViewBag.SinglePageCategory, page => Url.Action("Index",
-               new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
-               {
-                   UlElementClasses = new string[] { "pagination" },
-                   LiElementClasses = new string[] { "page-item" },
-                   PageClasses = new string[] { "page-link" },
-               })
-            </div>
-        </div>
-    </div>
+                        else
+                        {
+                            <td>
+                                <span class="fas fa-ban"></span>
+                            </td>
+                            <td>
+                                <span class="fas fa-ban"></span>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Html.PagedListPager((IPagedList)ViewBag.SinglePageCategory, page => Url.Action("Index",
+        new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
+        {
+            UlElementClasses = new string[] { "pagination" },
+            LiElementClasses = new string[] { "page-item" },
+            PageClasses = new string[] { "page-link" },
+        })
+    </div>            
 </div>

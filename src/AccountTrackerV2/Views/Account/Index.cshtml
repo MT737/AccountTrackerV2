@@ -10,54 +10,50 @@
 <div class="row">
     <div class="col-md-6">
         <partial name="~/Views/Shared/_IndexHeading.cshtml" />
-        <div class="panel panel-default">
-            @using (Html.BeginForm("Index", "Account", FormMethod.Get))
+        @using (Html.BeginForm("Index", "Account", FormMethod.Get))
+        {
+            <p>
+                Find by Name: @Html.TextBox("searchName", ViewBag.CurrentFilter as string)
+                <input type="submit" value="Search"/>
+            </p>
+        }
+        <table class="table table-sm">
+            <caption>Index of accounts</caption>
+            <thead class="thead-light">
+                <tr>
+                    <th>
+                        @Html.ActionLink("Account", "Index", new { sortOrder = ViewBag.NameSortParam, currentFilter = ViewBag.CurrentFilter})
+                    </th>
+                    <th>
+                        @Html.ActionLink("Balance", "Index", new { sortOrder = ViewBag.BalanceSortParam, currentFilter = ViewBag.CurrentFilter })
+                    </th>
+                    <th>Asset</th>
+                    <th>Active</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var account in ViewBag.SinglePageAccount)
+                {
+                    <tr>
+                        <td>@account.Name</td>
+                        <td style="text-align: right">$@account.Balance.ToString("#,##0.00")</td>
+                        <td>@account.IsAsset</td>
+                        <td>@account.IsActive</td>
+                        <td>
+                            <a href="@Url.Action("Edit", "Account", new { id = account.AccountID })" />
+                            <span class="fas fa-edit"></span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @Html.PagedListPager((IPagedList)ViewBag.SinglePageAccount, page => Url.Action("Index",
+            new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
             {
-                <p>
-                    Find by Name: @Html.TextBox("searchName", ViewBag.CurrentFilter as string)
-                    <input type="submit" value="Search"/>
-                </p>
-            }
-            <div class="panel-body" style="overflow:auto">
-                <table class="table table-sm">
-                    <caption>Index of accounts</caption>
-                    <thead class="thead-light">
-                        <tr>
-                            <th>
-                                @Html.ActionLink("Account", "Index", new { sortOrder = ViewBag.NameSortParam, currentFilter = ViewBag.CurrentFilter})
-                            </th>
-                            <th>
-                                @Html.ActionLink("Balance", "Index", new { sortOrder = ViewBag.BalanceSortParam, currentFilter = ViewBag.CurrentFilter })
-                            </th>
-                            <th>Asset</th>
-                            <th>Active</th>
-                            <th>Edit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var account in ViewBag.SinglePageAccount)
-                        {
-                            <tr>
-                                <td>@account.Name</td>
-                                <td style="text-align: right">$@account.Balance.ToString("#,##0.00")</td>
-                                <td>@account.IsAsset</td>
-                                <td>@account.IsActive</td>
-                                <td>
-                                    <a href="@Url.Action("Edit", "Account", new { id = account.AccountID })" />
-                                    <span class="fas fa-edit"></span>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                @Html.PagedListPager((IPagedList)ViewBag.SinglePageAccount, page => Url.Action("Index",
-                    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }), new X.PagedList.Web.Common.PagedListRenderOptionsBase
-                    {
-                        UlElementClasses = new string[] { "pagination" },
-                        LiElementClasses = new string[] { "page-item" },
-                        PageClasses = new string[] { "page-link" },
-                    })
-            </div>
-        </div>
+                UlElementClasses = new string[] { "pagination" },
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" },
+            })
     </div>
 </div>
