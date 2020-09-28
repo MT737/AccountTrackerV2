@@ -10,7 +10,7 @@ This is a simple ASP.Net Core web application making use of Entity Framework and
 2. ~~Add filtering to Accounts, Categories, and Vendors indexes.~~ 9/26/2020
 3. ~~Add pagination to Accounts, Categories, and Vendors indexes.~~ 9/26/2020
 4. ~~Correct issue in which entity editing validation failure messages are presented in green success textboxes.~~ 9/26/2020
-5. Update old HTML BootStrap formating (panels are now cards)
+5. ~~Update old HTML BootStrap formating (panels are now cards)~~ 9/27/20
 6. Further test account balances for accuracy after multiple transactions
 
 ### Roadmap
