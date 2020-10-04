@@ -1,6 +1,4 @@
 # AccountTrackerV2
-[Live site](https://accounttrackerv220200924184215.azurewebsites.net/Identity/Account/Login?ReturnUrl=%2F) hosted by Microsoft Azure.
-
 
 ### Overview
 This is a simple ASP.Net Core web application making use of Entity Framework and Entity Framework Identity. I'm building and updating the application as a personal exercise. As such, it should not be utilized by anyone for the storage of sensitive and required data. WARNING! Data will not be persisted into perpetuity and the site is not SSL/TSL protected. 
